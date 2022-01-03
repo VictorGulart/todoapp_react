@@ -12,11 +12,7 @@ import {
   USER_CREATE_FAILURE,
 } from "./action_types";
 
-const urls = {
-  fetchUser: "api/auth/login/",
-  logUserOut: "/api/auth/logout/",
-  createUser: "/api/auth/register/",
-};
+import { user_login, user_logout, user_register } from "./urls";
 
 export const fetchUser = (username, password) => {
   return (dispatch) => {
@@ -26,7 +22,7 @@ export const fetchUser = (username, password) => {
     // post username & password to the server
     // promise dispatches a fetchUserSuccess if the status is 'success'
     // otherwise it dispatches a fetchUserFailure
-    fetch(urls.fetchUser, {
+    fetch(user_login, {
       method: "POST",
       headers: {
         "Content-type": "Application/json;charset=utf-8",
@@ -79,7 +75,7 @@ export const userLogOut = (token) => {
   return (dispatch) => {
     dispatch(userLogOutRequest());
 
-    fetch(urls.logUserOut, {
+    fetch(user_logout, {
       method: "POST",
       headers: {
         Authorization: "token " + token,
@@ -137,7 +133,7 @@ export const fetchCreateUser = (user) => {
     // post username & password to the server
     // promise dispatches a fetchUserSuccess if the status is 'success'
     // otherwise it dispatches a fetchUserFailure
-    fetch(urls.createUser, {
+    fetch(user_register, {
       method: "POST",
       headers: {
         "Content-type": "Application/json;charset=utf-8",

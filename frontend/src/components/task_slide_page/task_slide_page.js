@@ -59,9 +59,7 @@ const TaskSlidePage = ({ token, lists, updateTask, deleteTask }) => {
 
   const saveTask = (e) => {
     e.preventDefault();
-    console.log("Saving task");
     updateTask(token, task);
-    console.log("task saved");
   };
 
   const delTask = (e) => {

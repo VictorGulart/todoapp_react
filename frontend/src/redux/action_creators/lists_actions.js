@@ -23,13 +23,13 @@ import {
   DELETE_LIST_FAILURE,
 } from "../action_creators/action_types";
 
-const URLS = {
-  get_lists: "api/lists",
-  get_list: "api/list/",
-  create_list: "api/create-list/",
-  update_list: "api/update-list/", // add list id
-  delete_list: "api/delete-list/", // add list id
-};
+import {
+  get_list,
+  get_lists,
+  create_list,
+  update_list,
+  delete_list,
+} from "./urls";
 
 const default_list = {
   title: "New List",
@@ -41,7 +41,7 @@ export const fetchCreateList = (token) => {
     // record list creation request
     dispatch(createListRequest());
 
-    fetch(URLS.create_list, {
+    fetch(create_list, {
       method: "POST",
       headers: {
         Authorization: "token " + token,
@@ -95,7 +95,7 @@ export const fetchLists = (token) => {
   return (dispatch) => {
     dispatch(fetchListsRequest()); // set loading
 
-    fetch(URLS.get_lists, {
+    fetch(get_lists, {
       method: "GET",
       headers: {
         Authorization: "token " + token,
@@ -146,7 +146,7 @@ export const fetchList = (token, list_id) => {
   return (dispatch) => {
     dispatch(fetchListRequest()); // record fetching request
 
-    fetch(URLS.get_list + list_id + "/", {
+    fetch(get_list + list_id + "/", {
       method: "GET",
       headers: {
         Authorization: "token " + token,
@@ -198,8 +198,8 @@ export const fetchUpdateList = (token, list) => {
   return (dispatch) => {
     dispatch(updateListRequest()); // set loading
 
-    // console.log(URLS.update_list + list.id + "/");
-    fetch(URLS.update_list + list.id + "/", {
+    // console.log(update_list + list.id + "/");
+    fetch(update_list + list.id + "/", {
       method: "POST",
       headers: {
         Authorization: "token " + token,
@@ -255,7 +255,7 @@ export const fetchDeleteList = (token, list_id) => {
     dispatch(deleteListRequest()); // record the request to delete
 
     // console.log(URL.delete_list + list_id + "/");
-    fetch(URLS.delete_list + list_id + "/", {
+    fetch(delete_list + list_id + "/", {
       method: "DELETE",
       headers: {
         Authorization: "token " + token,

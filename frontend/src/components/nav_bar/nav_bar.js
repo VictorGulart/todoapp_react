@@ -1,15 +1,19 @@
 import "./nav_bar.css";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
+
 import { connect } from "react-redux";
 import { userLogOut } from "../../redux/action_creators/user_actions";
 
 export function NavBar({ auth, token, logUserOut }) {
   const [show, setShow] = useState(false);
 
+  const history = useHistory();
+
   const onClickLogOut = (e) => {
     e.preventDefault();
     logUserOut(token);
+    history.push("/login");
   };
 
   return (

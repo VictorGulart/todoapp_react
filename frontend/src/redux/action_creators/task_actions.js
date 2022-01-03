@@ -11,11 +11,7 @@ import {
   UPDATE_LIST_FAILURE,
 } from "./action_types";
 
-const URLS = {
-  create_task: "api/create-task/",
-  update_task: "api/update-task/",
-  delete_task: "api/delete-task/",
-};
+import { create_task, update_task, delete_task } from "./urls";
 
 /**
  * TASKS
@@ -38,7 +34,7 @@ export const fetchCreateTask = (token, list_id) => {
     dispatch(createTaskRequest());
 
     // create a fetch call
-    fetch(URLS.create_task, {
+    fetch(create_task, {
       method: "POST",
       headers: {
         Authorization: "token " + token,
@@ -96,7 +92,7 @@ export const fetchUpdateTask = (token, task) => {
     // dispatch request
     dispatch(updateTaskRequest());
 
-    fetch(URLS.update_task + `${task.id}/`, {
+    fetch(update_task + `${task.id}/`, {
       method: "POST",
       headers: {
         Authorization: `token ${token}`,
@@ -156,7 +152,7 @@ export const fetchDeleteTask = (token, task) => {
     dispatch(deleteTaskRequest());
 
     // create a fetch call
-    fetch(URLS.delete_task + `${task.id}/`, {
+    fetch(delete_task + `${task.id}/`, {
       method: "DELETE",
       headers: {
         Authorization: "token " + token,
