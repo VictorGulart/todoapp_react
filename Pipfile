@@ -15,6 +15,7 @@ setuptools = "*"
 gunicorn = "*"
 django-heroku = "*"
 whitenoise = "*"
+requests = "*"
 
 [dev-packages]
 

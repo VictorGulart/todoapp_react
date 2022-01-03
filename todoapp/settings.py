@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
+    'https://victor-todoapp.herokuapp.com',
 ]
 
 
