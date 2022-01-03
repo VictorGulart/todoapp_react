@@ -1,0 +1,57 @@
+$breakpoints: (
+  xs: 576px,
+  sm: 768px,
+  md: 992px,
+  lg: 1200px,
+);
+
+@mixin responsive-below($breakpoint) {
+  @if map-has-key($map: $breakpoints, $key: $breakpoint) {
+    $breakpoint-value: map-get(
+      $map: $breakpoints,
+      $key: $breakpoint,
+    );
+    @media (max-width: $breakpoint-value) {
+      @content;
+    }
+  } @else {
+    @warn ("The breakpoint: #{breakpoint} does not exist.");
+  }
+}
+
+@mixin responsive-above($breakpoint) {
+  @if map-has-key($map: $breakpoints, $key: $breakpoint) {
+    $breakpoint-value: map-get(
+      $map: $breakpoints,
+      $key: $breakpoint,
+    );
+    @media (min-width: ($breakpoint-value) - 1) {
+      @content;
+    }
+  } @else {
+    @warn ("The breakpoint: #{breakpoint} does not exist.");
+  }
+}
+
+@mixin responsive-between($lower, $upper) {
+  @if (map-has-key($map: $breakpoints, $key: $lower)) and
+    (map-has-key($map: $breakpoints, $key: $upper))
+  {
+    $min-value: map-get(
+      $map: $breakpoints,
+      $key: $lower,
+    );
+    $max-value: map-get(
+      $map: $breakpoints,
+      $key: $upper,
+    );
+
+    @media (min-width: $min-value) and (max-width: $max-value) {
+      @content;
+    }
+  } @else if (map-has-key($map: $breakpoints, $key: $lower)) {
+    @warn ("the breakpoint: #{lower} does not exist.");
+  } @else if (map-has-key($map: $breakpoints, $key: $upper)) {
+    @warn ("the breakpoint: #{upper} does not exist.");
+  }
+}

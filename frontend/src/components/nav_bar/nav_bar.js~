@@ -1,0 +1,42 @@
+import "./nav_bar.css";
+import { Link } from "react-router-dom";
+
+export default function NavBar() {
+    return (
+        <div className="navbar">
+            <div className="inner">
+                <div className="navigation">
+                    <div className="nav__link">
+                        <a href="#">
+                            <div>Home</div>
+                        </a>
+                    </div>
+                </div>
+                <div className="account-mobile">
+                    <a href="#">
+                        <div className="user">
+                            <i className="fas fa-user-circle"></i>
+                        </div>
+                    </a>
+                </div>
+                <div className="account-desktop">
+                    <div className="nav__link">
+                        <Link to="/login">Login</Link>
+                        {/* <a href="#">
+              <div>Login</div>
+            </a> */}
+                    </div>
+                    <div>
+                        <span>|</span>
+                    </div>
+                    <div className="nav__link">
+                        <Link to="/register">Register</Link>
+                        {/* <a href="#">
+              <div>Register</div>
+            </a> */}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

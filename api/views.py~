@@ -1,0 +1,341 @@
+from typing import Dict
+
+# Imports from Django
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, request, JsonResponse
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.core.exceptions import PermissionDenied
+from django.contrib import messages
+
+# Imports from Rest Framework
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.serializers import Serializer
+from rest_framework import status
+
+# Import login and register forms
+from .forms import RegisterForm
+
+# Import API Models
+from .models import TaskList, Task, Role, Assignment
+
+# Import Serializers
+from .serializers import RoleSrl, TaskListSrl, TaskListSrlDetail, TaskSrl, CreateTaskListSrl
+
+# https://www.youtube.com/watch?v=TmsD8QExZ84&t=1083s
+# https://www.youtube.com/watch?v=W9BjUoot2Eo&.t=490s
+
+# LOGIN AND LOGOUT
+
+
+# @ensure_csrf_cookie
+def loginView(request: request) -> HttpResponse:
+    print(request.POST)
+    if request.method == "POST":
+        return HttpResponse(status=200)
+    return HttpResponse(status=403)
+
+
+# @ensure_csrf_cookie
+# def loginView(request: request) -> HttpResponse:
+#     '''
+#         Check if user is authenticated already, token maybe.
+#         if yes return user
+#         If the login is succeful return a key value
+#         success:message for react to redirect and show the
+#         flash message (maybe with toastify)
+#     '''
+#     response = {
+#         "user": "anonymous",
+#         "errors": [],
+#         "messages": []
+#     }
+#     if request.method == 'POST':
+#         username = request.POST.get("username")
+#         password = request.POST.get("password")
+#         print(request.headers, request.cookies)
+#         user = authenticate(request, username=username, password=password)
+#         if user is not None:
+#             print("user authenticated")
+#             login(request, user)
+#             response["messages"].append(("success", "User is logged in."))
+#             return JsonResponse(response)
+#         else:
+#             response["messages"].append(
+#                 ("denied", "Something is wrong with username or password."))
+#             return JsonResponse(response)
+
+#     return JsonResponse(response)
+
+
+def registerView(request: request):
+
+    registerForm = RegisterForm()
+
+    if request.method == 'POST':
+
+        registerForm = RegisterForm(request.POST)
+        if registerForm.is_valid():
+            registerForm.save()
+            user = registerForm.cleaned_data.get("username")
+            messages.success(
+                request, f'User {user} created successfully.')
+            return redirect('login')
+
+    context = {"form": registerForm}
+    return render(request, 'register.html', context)
+
+# API VIEWS
+
+
+@api_view(["GET"])
+@login_required(login_url='login')
+def APIOverview(request: request) -> Response:
+
+    api_urls: Dict = {
+        "Role": "/list-role/<str:pk>",
+        # LISTS
+        "Lists": "/lists/",
+        "List": "/list/<str:pk>/",
+        "Create list": "/create-list/",
+        "Update list": "/update-list/",
+        "Delete list": "/delete-list/<str:pk>",
+        # TASKS
+        "Task": "/task/<str:pk>",
+        "Create task": "/task/<str:pk>",
+        "Update task": "/update-task/<str:pk>",
+        "Delete task": "/delete-task/<str:pk>",
+        # OTHER
+        "Delete role": "/delete-role/<str:lst>/<str:user>",
+        "Delete assignment": "/delete-assignment/<str:task>/<str:user>",
+    }
+    return Response(api_urls)
+
+# Functionalities for the user
+
+
+@api_view(["GET"])
+@login_required(login_url='login')
+def userTaskLists(request: request) -> Response:
+    ''' 
+        Returns a list of the TaskLists of the logged user. 
+    '''
+    user = get_object_or_404(User, id=request.user.id)
+    tasks = user.tasklists.all()
+    serializer = TaskListSrl(tasks, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def userTaskList(request: request, pk: str) -> Response:
+    ''' 
+        Shows only if the user has access to it.
+        Shows a list in more detail. Also includes users and roles. 
+        Using raw redirect
+    '''
+
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    try:
+        user = User.objects.get(id=request.user.id)
+        lst = TaskList.objects.get(id=pk)
+        if lst in user.tasklists.all():
+            serializer = TaskListSrlDetail(lst)
+            return Response(serializer.data)
+        else:
+            raise PermissionDenied
+    except TaskList.DoesNotExist:
+        content = {"please move along": "nothing to see here"}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    except PermissionDenied:
+        content = {"please move along": "nothing to see here"}
+        return Response(content, status=status.HTTP_403_FORBIDDEN)
+
+
+@api_view(["GET"])
+@login_required(login_url='login')
+def userTask(request: request, pk: str) -> Response:
+    try:
+        user = User.objects.get(id=request.user.id)
+        task = Task.objects.get(id=pk)
+        if user in task.users.all():
+            serializer = TaskSrl(task)
+            return Response(serializer.data)
+        else:
+            raise PermissionDenied
+
+    except Task.DoesNotExist:
+        content = {"please move along": "nothing to see here"}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    except PermissionDenied:
+        content = {"please move along": "nothing to see here"}
+        return Response(content, status=status.HTTP_403_FORBIDDEN)
+
+
+@api_view(["POST"])
+@login_required(login_url='login')
+def createTaskList(request: request) -> Response:
+    serializer = CreateTaskListSrl(data=request.data)
+
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+@login_required(login_url='login')
+def createTask(request: request) -> Response:
+    serializer = TaskSrl(data=request.data)
+
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+@login_required(login_url='login')
+def updateTaskList(request: request, pk: str) -> Response:
+    task_list = TaskList.objects.get(id=pk)
+
+    serializer = CreateTaskListSrl(instance=task_list, data=request.data)
+
+    try:
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+    except TaskList.DoesNotExist:
+        content = {"please move along": "nothing to see here"}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.data)
+
+
+@api_view(["POST"])
+@login_required(login_url='login')
+def updateTask(request: request, pk: str):
+    task = Task.objects.get(id=pk)
+
+    serializer = TaskSrl(instance=task, data=request.data,
+                         context={"request": request})
+
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+
+    return Response(serializer.data)
+
+
+@api_view(["DELETE"])
+@login_required(login_url='login')
+def deleteTaskList(request: request, pk: str):
+    '''
+        Deletes a TaskList.
+        Missing authentication
+    '''
+    task_list = TaskList.objects.get(id=pk)
+    task_list.delete()
+    return Response("List has been deleted.")
+
+
+@api_view(["DELETE"])
+@login_required(login_url='login')
+def deleteTask(request: request, pk: str):
+    ''' 
+        Deletes a task
+        Missing authentication
+    '''
+    task = Task.objects.get(id=pk)
+    task.delete()
+    return Response("Task has been deleted.")
+
+
+@api_view(["DELETE"])
+@login_required(login_url='login')
+def deleteUserAssignment(request: request, task: str, user: str):
+    '''
+        Deleting assignment from a user
+        Missing Authentication
+    '''
+    task = Task.objects.get(id=task)
+    assign = task.assignments.get(user=user)
+    assign.delete()
+
+    return Response("Assignment has been removed from the user.")
+
+
+@api_view(["DELETE"])
+@login_required(login_url='login')
+def deleteUserRole(request: request, lst: str, user: str):
+    ''' 
+        Removes the connection of the 
+        This should also remove the user connections to the tasks of the list.
+        Missing authentication
+    '''
+    user = User.objects.get(id=user)
+    lst = TaskList.objects.get(id=lst)
+    role = user.roles.filter(todo_list=lst.id)
+    assigns = user.assignments.filter()
+
+    role.delete()
+    for assign in assigns:
+        if assign.user == user and assign.task.from_list == lst:
+            assign.delete()
+
+    return Response("Role and Tasks for the user were deleted.")
+
+# Extra Functionalities for test and other
+
+
+@api_view(["GET"])
+def taskLists(request: request):
+    ''' Return a list of TaskLists including the users that have access
+        and the roles of the users. '''
+    lists = TaskList.objects.all()
+    serializer = TaskListSrl(lists, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def taskList(request: request, pk: str):
+    ''' Shows a list in more detail. Also includes users and roles. '''
+    lst = TaskList.objects.get(id=pk)
+    serializer = TaskListSrlDetail(lst)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def taskListUpdate(request: request, pk: str):
+    task = TaskList.objects.get(id=pk)
+    serializer = TaskListSrl(task)
+
+    if serializer.is_valid():
+        serializer.save()
+
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def userRoleDetail(request: request, pk: str):
+    '''
+        Returns role information of an user for a specific TaskLisk 
+    '''
+    lst = TaskList.objects.get(id=pk)
+    role = Role.objects.filter(user=request.user, todo_list=lst)
+    serializer = RoleSrl(role[0])
+
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def roleDetail(request: request, pk: str):
+    '''
+        Returns all role information of TaskLisk 
+    '''
+    lst = TaskList.objects.get(id=pk)
+    serializer = RoleSrl(lst.roles.all(), many=True)
+
+    return Response(serializer.data)

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+
+<body>
+    <div class="messages">
+        {% for message in messages %}
+        <div class="{{message.tags}}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="container">
+        <form action="{% url 'register' %}" class="form__container" method="post">
+            {% csrf_token %}
+            {% if errors %}
+            {{errors}}
+            {% endif %}
+
+            {% for field in form %}
+            <label for="{{field.auto_id}}" class="label">{{field.label}}</label>
+            {{field}}
+            {% endfor %}
+            <button class="btn form" type="submit">Create Account</button>
+        </form>
+        <div class="register__link">
+            <span>You have an account?</span>
+            <a href="{% url 'login' %}">Login</a>
+        </div>
+    </div>
+</body>
+
+</html>

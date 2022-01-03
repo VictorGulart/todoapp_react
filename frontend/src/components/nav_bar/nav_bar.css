@@ -1,0 +1,100 @@
+.navbar {
+  background-color: #092834;
+}
+
+.navbar > * {
+  font-size: 1.4rem;
+}
+
+.account-mobile {
+  display: none;
+}
+
+.account-desktop {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: #466365;
+}
+
+.inner {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+
+.btn-home,
+.btn-logout {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+.btn-home:hover > .nav__link > a,
+.btn-logout:hover > .nav__link > a {
+  text-decoration: underline;
+  color: #b2d732;
+}
+
+.nav__link a {
+  text-decoration: none;
+  color: #f0f7d4;
+  -webkit-transition: all 0.15s ease-in;
+  transition: all 0.15s ease-in;
+  font-weight: bold;
+}
+
+.nav__link a > div {
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+}
+
+.user {
+  padding: 10px;
+  color: white;
+}
+
+@media (min-width: 767px) {
+  .navbar {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+  .inner {
+    width: 80%;
+  }
+}
+
+.menu-bars {
+  cursor: pointer;
+  color: #f0f7d4;
+}
+
+.menu-link {
+  cursor: pointer;
+  color: #f0f7d4;
+  padding: 0.4rem;
+  font-size: 1rem;
+}
+/*# sourceMappingURL=nav_bar.css.map */

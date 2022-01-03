@@ -1,0 +1,36 @@
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+
+    # User Authentication
+    path("login/", views.loginView, name="login"),
+    path("register/", views.registerView, name="register"),
+
+    # API OVERVIEW
+    path("api/", views.APIOverview, name="api-overview"),
+
+    # User Routes
+    path("api/list/<str:pk>/", views.userTaskList, name="list"),
+    path("api/lists/", views.userTaskLists, name="lists"),
+    path("api/create-list/", views.createTaskList, name="create-list"),
+    path("api/update-list/<str:pk>", views.updateTaskList, name="update-list"),
+    path("api/role-detail/<str:pk>/", views.userRoleDetail, name="role-detail"),
+    path("api/task/<str:pk>/", views.userTask, name="task"),
+    path("api/create-task/", views.createTask, name="create-task"),
+    path("api/update-task/<str:pk>/", views.updateTask, name="update-task"),
+
+    # Deleting Routes
+    path("api/delete-task/<str:pk>/", views.deleteTask, name="delete-task"),
+    path("api/delete-list/<str:pk>/", views.deleteTaskList, name="delete-task"),
+    path("api/delete-role/<str:lst>/<str:user>/",
+         views.deleteUserRole, name="delete-task"),
+    path("api/delete-assignment/<str:task>/<str:user>/",
+         views.deleteUserAssignment, name="delete-task"),
+
+    # Other Functionities
+    path("api/task-lists/", views.taskLists, name="task-lists"),
+    path("api/task-list/<str:pk>/", views.taskList, name="task-list"),
+    path("api/role-detail/<str:pk>/", views.roleDetail, name="role-detail"),
+]

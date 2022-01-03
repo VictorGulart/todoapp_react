@@ -1,0 +1,95 @@
+import "lists_display.css";
+import { useState, useEffect, useRef } from "react";
+import { listsFetch } from "../../helper/api_fetch";
+
+function Task(props) {
+    return (
+        <div className="task">
+            <div className="task__inner">
+                <div className="content"> {props.title} </div>
+                <div className="actions">
+                    <div className="edit">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                    <div className="delete">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function List() {
+    const arrow = useRef(null);
+    const tasks_container = useRef(null);
+
+    useEffect(() => {
+        // Get the size of th
+        var height = tasks_container.current.scrollHeight;
+        tasks_container.current.style.maxHeight = "0px";
+        tasks_container.current.style.padding = "0px";
+    });
+
+    useEffect(() => {
+        // Getting lists should be done after auth is done!!!
+        listsFetch();
+    });
+
+    const handleArrowClick = (e) => {
+        arrow.current.classList.toggle("open");
+        var height = tasks_container.current.scrollHeight;
+
+        if (tasks_container.current.classList.contains("hidden")) {
+            console.log("here");
+            tasks_container.current.style.maxHeight = `calc(${
+                height + "px"
+            } + 3rem)`;
+            tasks_container.current.style.padding = "";
+            tasks_container.current.classList.remove("hidden");
+        } else {
+            tasks_container.current.classList.add("hidden");
+            tasks_container.current.style.maxHeight = "0px";
+            tasks_container.current.style.padding = "0px";
+        }
+    };
+
+    return (
+        <div className="list__container">
+            <div className="list" onClick={handleArrowClick}>
+                <div className="arrow" ref={arrow}>
+                    <i className="fas fa-chevron-right"></i>
+                </div>
+                <div className="list__title">List</div>
+                <div className="actions">
+                    <div className="edit">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                    <div className="delete">
+                        <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+            </div>
+            <div className="tasks__container hidden" ref={tasks_container}>
+                <div className="tasks__container__inner">
+                    <Task title="Task 1" />
+                    <Task title="Task 1" />
+                    <Task title="Task 1" />
+                    <Task title="Task 1" />
+                    <Task title="Task 1" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function ListsDisplay() {
+    return (
+        <div className="lists-display">
+            <div className="list-display__inner">
+                <List />
+                <List />
+            </div>
+        </div>
+    );
+}

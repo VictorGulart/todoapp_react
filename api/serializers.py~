@@ -1,0 +1,154 @@
+from django.core.exceptions import PermissionDenied
+from django.db.models import fields
+from django.db.models.query import QuerySet
+from rest_framework import serializers
+from .models import TaskList, Task, Role, Assignment
+from django.contrib.auth.models import User
+
+
+class CreateAssignmentrSrl(serializers.ModelSerializer):
+    class Meta:
+        model = Assignment
+        fields = ("id", "user", )
+
+
+class TaskSrl(serializers.ModelSerializer):
+    assignments = CreateAssignmentrSrl(many=True)
+
+    class Meta:
+        model = Task
+        fields = ("id", "assignments", "title", "description", "start_date",
+                  "end_date", "complete", "from_list")
+
+    def create(self, validated_data):
+        ''' 
+            Creates the a Task 
+            It's possible to assign task to other users.
+        '''
+        users = validated_data.pop('assignments')
+        task = Task.objects.create(**validated_data)
+
+        print(users)
+        for user in users:
+            task.assignments.create(**user)
+        return task
+
+    def update(self, instance, validated_data):
+        # check if the user has authorization to update an task
+        user = None
+        request = self.context.get("request")
+        if hasattr(request, "user"):
+            user = request.user
+
+        try:
+            lst = TaskList.objects.get(id=instance.from_list.id)
+            role = lst.roles.get(id=user.id)
+            if not role.role <= 2:
+                raise PermissionDenied
+
+        except Task.DoesNotExist:
+            raise Task.DoesNotExist
+        except TaskList.DoesNotExist:
+            raise PermissionDenied
+        except PermissionDenied:
+            raise PermissionDenied
+
+        assignments = validated_data.pop("assignments")
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        for assignment in assignments:
+            user = User.objects.get(id=assignment.get("user").id)
+
+            if not Assignment.objects.filter(user=user, task=instance):
+                new_assignment = Assignment(user=user, task=instance)
+                new_assignment.save()
+                # instance.assignments.add(new_assignment)
+
+        return instance
+
+
+class RoleSrl(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ["user", "task_list", "role"]
+        depht = 1
+
+
+class UserSrl(serializers.ModelSerializer):
+    ''' I might need to customize to get the roles in here '''
+    # roles = serializers.PrimaryKeyRelatedField(source="role_set", many=True, queryset=Role.objects.all())
+    last_login = serializers.DateTimeField(read_only=True)
+    username = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'last_login',)
+
+
+class TaskListSrlDetail(serializers.ModelSerializer):
+    users = UserSrl(many=True)
+    roles = RoleSrl(many=True)
+
+    class Meta:
+        model = TaskList
+        # fields = ("id", "title", "description", "users", "roles")
+        fields = "__all__"
+
+
+class TaskListSrl(serializers.ModelSerializer):
+    users = UserSrl(many=True)
+    roles = RoleSrl(many=True)
+    tasks = TaskSrl(many=True)
+
+    class Meta:
+        model = TaskList
+        fields = ("id", "title", "description", "users", "roles", "tasks")
+
+
+class CreateRoleSrl(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ('id', "user", "role")
+
+
+class CreateTaskListSrl(serializers.ModelSerializer):
+    roles = CreateRoleSrl(many=True)
+
+    class Meta:
+        model = TaskList
+        fields = ("id", "title", "description", "roles")
+
+    def create(self, validated_data):
+        roles = validated_data.pop('roles')
+        task_list = TaskList.objects.create(**validated_data)
+
+        for role in roles:
+            task_list.roles.create(task_list=task_list, **role)
+
+        return task_list
+
+    def update(self, instance, validated_data):
+        ''' Updates the title, description, complete, or/and roles '''
+        roles = validated_data.pop('roles')
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        # M2M
+        # get all the roles in the task list
+        try:
+            for role in roles:
+                role_instance = instance.roles.get(user=role.get("user"))
+                setattr(role_instance, "role", role.get("role"))
+                role_instance.save()
+
+        except Role.DoesNotExist:
+            raise (Role.DoesNotExist)
+
+        return instance
