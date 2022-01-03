@@ -1,3 +1,4 @@
+release: python manage.py migrate
 web: gunicorn gettingstarted.wsgi
 web: python manage.py runserver 0.0.0.0:5000
 
