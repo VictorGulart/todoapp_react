@@ -11,8 +11,8 @@ __py_cache__/
 *.exe
 *.o
 *.so
-
 *.so
+*.json
 
 # Packages #
 ############
