@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'accounts',
     'rest_framework',
     'rest_framework.authtoken',
-#    'corsheaders',
+   'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-#    "corsheaders.middleware.CorsPostCsrfMiddleware"
+   "corsheaders.middleware.CorsPostCsrfMiddleware"
 ]
 
 REST_FRAMEWORK = {
@@ -160,9 +160,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Cors headers
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 django_heroku.settings(locals())
