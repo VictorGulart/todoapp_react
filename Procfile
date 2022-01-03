@@ -1,3 +1,3 @@
 release: python manage.py migrate
-web: gunicorn gettingstarted.wsgi
+web: gunicorn todoapp.wsgi
 worker: python manage.py runserver
