@@ -2,17 +2,68 @@
 // and register 2 times
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { fetchCreateUser } from "../../redux/action_creators/user_actions";
+import { useHistory } from "react-router-dom";
 
-function RegisterPage() {
+function RegisterPage({ auth, createUser }) {
+  const history = useHistory();
+  const [account, setAccount] = useState({
+    email: "",
+    username: "",
+    password: "",
+    confirm_password: "",
+  });
+
+  const getFormData = (e) => {
+    console.log("submitting form");
+    e.preventDefault();
+    createUser(account);
+  };
+
+  useEffect(() => {
+    // If user was created and is authorized, redirect
+    // if (auth) {
+    //   history.push("/");
+    // }
+  }, [auth]);
+
   return (
     <div className="container-md full-page flex" style={{ rowGap: "1rem" }}>
-      <form className="input-group " style={{ rowGap: "1.5rem" }}>
+      <form
+        onSubmit={getFormData}
+        className="input-group "
+        style={{ rowGap: "1.5rem" }}
+      >
+        <div className="input-group rel">
+          <input
+            type="text"
+            name="email"
+            placeholder=" "
+            autoComplete="true"
+            onChange={(e) => {
+              setAccount({
+                ...account,
+                email: e.target.value,
+              });
+            }}
+          />
+          <label htmlFor="email" className="input-label--anim">
+            Email
+          </label>
+        </div>
         <div className="input-group rel">
           <input
             type="text"
             name="username"
             placeholder=" "
             autoComplete="true"
+            onChange={(e) => {
+              setAccount({
+                ...account,
+                username: e.target.value,
+              });
+            }}
           />
           <label htmlFor="username" className="input-label--anim">
             Username
@@ -20,12 +71,18 @@ function RegisterPage() {
         </div>
         <div className="input-group rel">
           <input
-            name="password1"
+            name="password"
             type="password"
             placeholder=" "
             autoComplete="true"
+            onChange={(e) => {
+              setAccount({
+                ...account,
+                password: e.target.value,
+              });
+            }}
           />
-          <label htmlFor="password1" className="input-label--anim">
+          <label htmlFor="password" className="input-label--anim">
             Password
           </label>
         </div>
@@ -35,6 +92,12 @@ function RegisterPage() {
             type="password"
             placeholder=" "
             autoComplete="true"
+            onChange={(e) => {
+              setAccount({
+                ...account,
+                confirm_password: e.target.value,
+              });
+            }}
           />
           <label htmlFor="password2" className="input-label--anim">
             Password Confirmation
@@ -52,10 +115,20 @@ function RegisterPage() {
   );
 }
 
-const mapDispatchToProps = (dispatch) => {
+// The loading page does not need anything from the state
+const mapStateToProps = (state) => {
+  const { auth } = state.fetchReducer;
   return {
-    createAccount: dispatch(fetchCreateAccount()),
+    auth,
   };
 };
 
-export default connect(null, mapDispatchToProps)(RegisterPage);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    createUser: (user) => {
+      dispatch(fetchCreateUser(user));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(RegisterPage);

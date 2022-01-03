@@ -128,7 +128,7 @@ export const userRedirected = () => {
   };
 };
 
-export const fetchCreateUser = (username, password, password2) => {
+export const fetchCreateUser = (user) => {
   // API call for creating an user
   return (dispatch) => {
     // dispatch a user request ==> loading = true
@@ -142,7 +142,7 @@ export const fetchCreateUser = (username, password, password2) => {
       headers: {
         "Content-type": "Application/json;charset=utf-8",
       },
-      body: JSON.stringify({ username, password, password2 }),
+      body: JSON.stringify(user),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -164,10 +164,10 @@ export const userCreateRequest = () => {
   };
 };
 
-export const userCreateSuccess = (user) => {
+export const userCreateSuccess = (data) => {
   return {
     type: USER_CREATE_SUCCESS,
-    payload: user,
+    payload: data,
   };
 };
 

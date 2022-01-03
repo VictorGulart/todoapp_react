@@ -104,11 +104,10 @@ export const fetchLists = (token) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.status === "success") {
-          // console.log(data);
           dispatch(fetchListsSuccess(data.data.lists));
         } else if (data.status === "fail") {
           console.log("Something was wrong if the request.");
-          console.log(res.status);
+          console.log(data.status);
           console.log(data.message);
         } else if (data.status === "error") {
           console.log("Something worse happened.");

@@ -15,6 +15,7 @@ function LoginPage({ auth, fetchUser }) {
   }
 
   useEffect(() => {
+    // If user was logged in and is authorized, redirect
     if (auth) {
       history.push("/");
     }

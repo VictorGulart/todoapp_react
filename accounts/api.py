@@ -26,6 +26,7 @@ def GetUserAPI( request ):
 @permission_classes([ AllowAny, ])
 def RegisterAPI( request ):
     if request.method == 'POST':
+        print(request.data)
         serializer = RegisterSerializer( data=request.data )
 
         if not serializer.is_valid():
