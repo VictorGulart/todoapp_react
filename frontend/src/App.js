@@ -40,16 +40,16 @@ function App() {
           <PrivateRoute exact path="/">
             <NavBar />
             <ListsDisplay />
+            <Route path="/list/:list_id">
+              {/* Special List component, for individual lists */}
+              <NavBar />
+              <ListSlidePage />
+            </Route>
+            <Route path="/task/:task_id">
+              <NavBar />
+              <TaskSlidePage />
+            </Route>
           </PrivateRoute>
-          <Route path="/list/:list_id">
-            {/* Special List component, for individual lists */}
-            <NavBar />
-            <ListSlidePage />
-          </Route>
-          <Route path="/task/:task_id">
-            <NavBar />
-            <TaskSlidePage />
-          </Route>
           <Route path="/login" component={LoginPage}></Route>
           <Route path="/register" component={RegisterPage}></Route>
           <Route>

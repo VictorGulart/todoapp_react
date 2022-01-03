@@ -9,9 +9,17 @@ import {
 } from "../../redux/action_creators/lists_actions";
 import List from "../list_for_display/list";
 
-const ListsDisplay = ({ token, lists, onLoadingFetchLists, createList }) => {
+const ListsDisplay = ({
+  auth,
+  token,
+  lists,
+  onLoadingFetchLists,
+  createList,
+}) => {
   useEffect(() => {
-    onLoadingFetchLists(token);
+    if (auth) {
+      onLoadingFetchLists(token);
+    }
   }, []);
 
   return (
@@ -44,10 +52,11 @@ const ListsDisplay = ({ token, lists, onLoadingFetchLists, createList }) => {
 // that it needs access to.
 const mapStateToProps = (state) => {
   const { lists } = state.listsReducer;
-  const { token } = state.fetchReducer;
+  const { token, auth } = state.fetchReducer;
   return {
     lists,
     token,
+    auth,
   };
 };
 
