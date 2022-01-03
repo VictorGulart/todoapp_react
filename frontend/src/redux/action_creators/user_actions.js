@@ -13,9 +13,9 @@ import {
 } from "./action_types";
 
 const urls = {
-  fetchUser: "http://127.0.0.1:8000/api/auth/login/",
-  logUserOut: "http://127.0.0.1:8000/api/auth/logout/",
-  createUser: "http://127.0.0.1:8000/api/auth/register/",
+  fetchUser: "api/auth/login/",
+  logUserOut: "/api/auth/logout/",
+  createUser: "/api/auth/register/",
 };
 
 export const fetchUser = (username, password) => {
