@@ -31,6 +31,10 @@ export const userReducer = (state = initState, action) => {
   // we create a new one and return it
 
   let { type } = action;
+  let { user, token } = action.payload.data
+    ? action.payload.data
+    : { user: null, token: null };
+
   switch (type) {
     case FETCH_USER_REQUEST:
       return {
@@ -38,7 +42,6 @@ export const userReducer = (state = initState, action) => {
         loading: true,
       };
     case FETCH_USER_SUCCESS:
-      let { user, token } = action.payload.data;
       return {
         ...state,
         loading: false,
@@ -68,6 +71,26 @@ export const userReducer = (state = initState, action) => {
       return {
         ...state,
         loading: false,
+        error: action.payload,
+      };
+    case USER_CREATE_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+    case USER_CREATE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        user: user,
+        token: token,
+        auth: true,
+      };
+    case USER_CREATE_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
       };
     default:
       return state;

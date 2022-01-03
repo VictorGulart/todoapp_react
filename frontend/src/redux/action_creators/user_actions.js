@@ -15,6 +15,7 @@ import {
 const urls = {
   fetchUser: "http://127.0.0.1:8000/api/auth/login/",
   logUserOut: "http://127.0.0.1:8000/api/auth/logout/",
+  createUser: "http://127.0.0.1:8000/api/auth/register/",
 };
 
 export const fetchUser = (username, password) => {
@@ -127,8 +128,34 @@ export const userRedirected = () => {
   };
 };
 
-export const fetchCreateUser = () => {
+export const fetchCreateUser = (username, password, password2) => {
   // API call for creating an user
+  return (dispatch) => {
+    // dispatch a user request ==> loading = true
+    dispatch(userCreateRequest());
+
+    // post username & password to the server
+    // promise dispatches a fetchUserSuccess if the status is 'success'
+    // otherwise it dispatches a fetchUserFailure
+    fetch(urls.createUser, {
+      method: "POST",
+      headers: {
+        "Content-type": "Application/json;charset=utf-8",
+      },
+      body: JSON.stringify({ username, password, password2 }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          dispatch(userCreateSuccess(data));
+        } else if (data.status === "fail") {
+          dispatch(userCreateFailure(data.message));
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 };
 
 export const userCreateRequest = () => {
