@@ -12,9 +12,9 @@ import {
 } from "./action_types";
 
 const URLS = {
-  create_task: "http://127.0.0.1:8000/api/create-task/",
-  update_task: "http://127.0.0.1:8000/api/update-task/",
-  delete_task: "http://127.0.0.1:8000/api/delete-task/",
+  create_task: "api/create-task/",
+  update_task: "api/update-task/",
+  delete_task: "api/delete-task/",
 };
 
 /**

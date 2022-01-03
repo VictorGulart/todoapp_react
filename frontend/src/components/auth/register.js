@@ -23,9 +23,9 @@ function RegisterPage({ auth, createUser }) {
 
   useEffect(() => {
     // If user was created and is authorized, redirect
-    // if (auth) {
-    //   history.push("/");
-    // }
+    if (auth) {
+      history.push("/");
+    }
   }, [auth]);
 
   return (
