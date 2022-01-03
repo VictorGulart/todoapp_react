@@ -24,11 +24,11 @@ import {
 } from "../action_creators/action_types";
 
 const URLS = {
-  get_lists: "http://localhost:8000/api/lists",
-  get_list: "http://localhost:8000/api/list/",
-  create_list: "http://localhost:8000/api/create-list/",
-  update_list: "http://localhost:8000/api/update-list/", // add list id
-  delete_list: "http://localhost:8000/api/delete-list/", // add list id
+  get_lists: "http://127.0.0.1:8000/api/lists",
+  get_list: "http://127.0.0.1:8000/api/list/",
+  create_list: "http://127.0.0.1:8000/api/create-list/",
+  update_list: "http://127.0.0.1:8000/api/update-list/", // add list id
+  delete_list: "http://127.0.0.1:8000/api/delete-list/", // add list id
 };
 
 const default_list = {

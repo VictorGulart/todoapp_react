@@ -13,8 +13,8 @@ import {
 } from "./action_types";
 
 const urls = {
-  fetchUser: "http://localhost:8000/api/auth/login/",
-  logUserOut: "http://localhost:8000/api/auth/logout/",
+  fetchUser: "http://127.0.0.1:8000/api/auth/login/",
+  logUserOut: "http://127.0.0.1:8000/api/auth/logout/",
 };
 
 export const fetchUser = (username, password) => {
