@@ -12,6 +12,8 @@ django-cors-headers = "*"
 pynvim = "*"
 neovim = "*"
 setuptools = "*"
+gunicorn = "*"
+django-heroku = "*"
 
 [dev-packages]
 
