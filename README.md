@@ -20,8 +20,12 @@ React.js, Tailwindcss, Django, Heroku
 ## Images of the project
 
 ### Login & Register pages
-
-[Login Page](imgs/login_page.png)
 ![Login Page](imgs/login_page.png)
+
+### Home Page
+![Home Page](imgs/home_page.png)
+
+### Side Menu
+![Side Menu](imgs/side_menu.png)
 
 
