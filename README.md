@@ -12,7 +12,7 @@ Things that need to be done:
 - display a task modal to be able to edit the task
 - update the user profile info on the nav bar and the side menu
 
-## Tools being used?
+## Tools being used
 
 React.js, Tailwindcss, Django, Heroku
 
