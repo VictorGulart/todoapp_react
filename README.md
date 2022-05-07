@@ -1,7 +1,7 @@
 # To Do APP
 
 This is the current personal project that I'm working on.
-The app will later be posted for free on Heroku.
+The app will later be posted on a free server from Heroku.
 
 I'm adding functionality to the page, and at the moment the login/register system is working and it's also possible to view the lists created on the admin page on the side menu of the app. Also, the first list is shown on the home page automatically.
 
