@@ -22,6 +22,6 @@ React.js, Tailwindcss, Django, Heroku
 ### Login & Register pages
 
 [Login Page](imgs/login_page.png)
-
+![Login Page](imgs/login_page.png)
 
 
