@@ -20,7 +20,7 @@ React.js, Tailwindcss, Django, Heroku
 ## Images of the project
 
 ### Login & Register pages
-![Login Page](imgs/login_page.png =200x)
+<img src="imgs/login_page.png" width="200">
 
 ### Home Page
 ![Home Page](imgs/home_page.png)
