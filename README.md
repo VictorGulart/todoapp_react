@@ -20,12 +20,13 @@ React.js, Tailwindcss, Django, Heroku
 ## Images of the project
 
 ### Login & Register pages
-<img src="imgs/login_page.png" width="200">
+<img src="imgs/login_page.png" width="350" alt="Login Page">
+<img src="imgs/register_page.png" width="350" alt="Register Page">
 
 ### Home Page
-![Home Page](imgs/home_page.png)
+<img src="imgs/imgs/home_page.png" width="350" alt="Home Page">
 
 ### Side Menu
-![Side Menu](imgs/side_menu.png)
+<img src="imgs/side_menu.png" width="350" alt="Side Menu">
 
 
