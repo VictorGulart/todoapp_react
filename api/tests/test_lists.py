@@ -9,9 +9,12 @@ from rest_framework.authtoken.models import Token
 # FROM API APP
 from api.tests.settings import url_register, \
     user_data, set_up_credentials, tear_down_credentials, change_credentials, \
-    list_data, url_get_list, url_get_lists, url_create_list, url_update_list, url_delete_list 
+    list_data, url_get_list, url_get_lists, url_create_list, url_update_list, url_delete_list
+
+from api.tests.settings import create_second_user 
 
 import copy
+import pdb
 
 # Create your tests here.
 
@@ -24,19 +27,7 @@ class TaskListsTests( APITestCase ):
         self.user = self.client.post( url_register, user_data, format='json' ).data['data']
         self.user_token = self.user['token']
         set_up_credentials( self )
-
-    def create_second_user( self ):
-        '''
-            Returns a dictionary with user information and a token value
-        '''
-        user_data = {
-                'username': "johnduplicate",
-                'password': "123456",
-                'email':'johnduplicate@gmail.com'
-        }
-        data = self.client.post( url_register, user_data, format='json' ).data['data']
-        return data.get( 'user' ), data.get( 'token' ) 
-
+    
     def test_create_list( self ):
         ''' 
             Test task creation with minimum data.
@@ -81,7 +72,7 @@ class TaskListsTests( APITestCase ):
     
     def test_create_with_roles( self ):
         data = copy.deepcopy( list_data )
-        user, token = self.create_second_user()
+        user, token = create_second_user(self)
 
         data['roles'] = [
             {
@@ -125,7 +116,7 @@ class TaskListsTests( APITestCase ):
         '''
 
         data = copy.deepcopy( list_data )
-        user, token = self.create_second_user()
+        user, token = create_second_user(self)
 
         data['roles'] = [
             {
@@ -179,7 +170,7 @@ class TaskListsTests( APITestCase ):
     def test_get_list_of_lists_without_auth( self ):
         '''
             Try getting all the lists from an user
-            without authentication
+            without authentication -> error
         '''
         self.client.post( url_create_list, list_data, format='json' ) # creates a list
 
@@ -188,7 +179,7 @@ class TaskListsTests( APITestCase ):
         res = self.client.get( url_get_lists, format='json' )
 
         self.assertEqual( res.data['status'], 'error' )
-        self.assertEqual( res.status_code, 403 )
+        self.assertEqual( res.status_code, 401 )
         self.assertIsNotNone( res.data.get( 'message', None ) )   
 
         # set up credentials for next tests
@@ -232,7 +223,7 @@ class TaskListsTests( APITestCase ):
             Try getting a list from an user
             without authentication
         '''
-        user, token = self.create_second_user()
+        user, token = create_second_user(self)
         change_credentials( self, token ) # change the user
         res = self.client.get( url_get_list, format='json' ) # try accessing the list from user 1
 
@@ -258,7 +249,7 @@ class TaskListsTests( APITestCase ):
         del data['description']
 
         self.client.post( url_create_list, list_data, format='json' )
-        res = self.client.post( url_update_list, data, format='json' )
+        res = self.client.patch( url_update_list, data, format='json' )
 
         self.assertEqual( res.data['status'], 'success' )
         self.assertEqual( res.status_code, 200 )
@@ -274,7 +265,7 @@ class TaskListsTests( APITestCase ):
         data['description'] = "updated successfully"
 
         self.client.post( url_create_list, list_data, format='json' )
-        res = self.client.post( url_update_list, data, format='json' )
+        res = self.client.patch( url_update_list, data, format='json' )
 
         self.assertEqual( res.data['status'], 'success' )
         self.assertEqual( res.status_code, 200 )
@@ -291,7 +282,7 @@ class TaskListsTests( APITestCase ):
         del data['description']
 
         self.client.post( url_create_list, list_data, format='json' )
-        res = self.client.post( url_update_list, data, format='json' )
+        res = self.client.patch( url_update_list, data, format='json' )
 
         self.assertEqual( res.data['status'], 'success' )
         self.assertEqual( res.status_code, 200 )
@@ -308,7 +299,7 @@ class TaskListsTests( APITestCase ):
         del data['description']
 
         self.client.post( url_create_list, list_data, format='json' )
-        res = self.client.post( url_update_list, data, format='json' )
+        res = self.client.patch( url_update_list, data, format='json' )
 
         self.assertEqual( res.data['status'], 'success' )
         self.assertEqual( res.status_code, 200 )
@@ -359,7 +350,7 @@ class TaskListsTests( APITestCase ):
         '''
             Try to delete a list with low authorization
         '''
-        user, token = self.create_second_user()
+        user, token = create_second_user(self)
         data = copy.deepcopy( list_data )
 
         data['roles'] = {
@@ -376,11 +367,3 @@ class TaskListsTests( APITestCase ):
         self.assertEqual( res.status_code, 401)
         self.assertEqual( res.data.get('status'), 'error')
         self.assertIsNotNone( res.data.get('message', None) )
-
-
-
-
-    
-
-
-

@@ -13,6 +13,8 @@ from accounts.api import RegisterAPI, LoginAPI, GetUserAPI
 # Settings
 from accounts.tests.settings import url_register, url_login, url_logout, user_data, set_up_credentials, tear_down_credentials
 
+import pdb
+
 
 class UserLoginTest( APITestCase ):
     def setUp( self ):

@@ -59,7 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-   "corsheaders.middleware.CorsPostCsrfMiddleware"
+    'corsheaders.middleware.CorsPostCsrfMiddleware'
 ]
 
 REST_FRAMEWORK = {

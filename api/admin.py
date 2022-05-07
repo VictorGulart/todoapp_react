@@ -40,3 +40,7 @@ class AssignmentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Assignment, AssignmentAdmin)
+
+admin.site.register(models.SubTask)
+
+    

@@ -21,6 +21,12 @@ url_create_task = reverse( 'create-task' )
 url_update_task = reverse( 'update-task', kwargs={"pk":1} )
 url_delete_task = reverse( 'delete-task', kwargs={"pk":1} ) 
 
+# SubTask
+url_get_subtask    = reverse( 'subtask', kwargs={"pk":1} ) # better to do it on test
+url_create_subtask = reverse( 'create-subtask' )
+url_update_subtask = reverse( 'update-subtask', kwargs={"pk":1} )
+url_delete_subtask = reverse( 'delete-subtask', kwargs={"pk":1} ) 
+
 # Roles
 url_create_role = reverse( 'create-role', kwargs={ 'lst':1, 'user':2 } ) # create a role
 url_update_role = reverse( 'update-role', kwargs={ 'lst':1, 'user':2 } )
@@ -44,10 +50,16 @@ task_data = {
     'from_list' : 1
 }
 
+subtask_data = {
+    'title' : 'Test SubTask',
+    'from_task' : 1
+}
+
 # DEAFAULT USER DATA
 user_data = {
             "username": "johndoe",
             "password": "12345",
+            "confirm_password": "12345",
             "email": "johndoe@gmail.com"
 }
 
@@ -64,13 +76,11 @@ def tear_down_credentials( self ):
     '''
     self.client.credentials()
 
-
 def change_credentials( self, token ):
     '''
         Quick change of the token to another user.  
     '''
     self.client.credentials( HTTP_AUTHORIZATION=f'Token {token}' )
-
 
 def create_second_user( self ):
     '''
@@ -79,6 +89,7 @@ def create_second_user( self ):
     user_data = {
             'username': "johnduplicate",
             'password': "123456",
+            'confirm_password': "123456",
             'email':'johnduplicate@gmail.com'
     }
     data = self.client.post( url_register, user_data, format='json' ).data['data']
@@ -91,6 +102,7 @@ def create_third_user( self ):
     user_data = {
             'username': "johnduplicate3",
             'password': "123456",
+            'confirm_password': "123456",
             'email':'johnduplicate3@gmail.com'
     }
     data = self.client.post( url_register, user_data, format='json' ).data['data']

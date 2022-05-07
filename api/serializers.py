@@ -1,5 +1,6 @@
 # Django
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError, transaction
 from django.db.models import fields
 from django.db.models.query import QuerySet
 from django.contrib.auth.models import User
@@ -10,8 +11,12 @@ from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
 
+# Working with classed based views
+from rest_framework.views import APIView
+from rest_framework import authentication, permissions
+
 # From app
-from .models import TaskList, Task, Role, Assignment
+from .models import TaskList, Task, Role, Assignment, SubTask
 
 # Debugging
 from pdb import set_trace
@@ -58,11 +63,23 @@ class AssignmentrSrl(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
     
+
+class SubTaskSrl(serializers.ModelSerializer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__( *args, **kwargs )
+        self.warning_messages = []
+
+    class Meta:
+        model = SubTask
+        fields = "__all__"
+
 class TaskSrl(serializers.ModelSerializer):
     assignments = serializers.ListSerializer(
         child = serializers.ModelField(model_field=Assignment()._meta.get_field('user')),
         allow_empty=True
     )
+    sub_tasks = SubTaskSrl(many=True, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__( *args, **kwargs )
@@ -71,21 +88,29 @@ class TaskSrl(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ("id", "assignments", "title", "description", "start_date",
-                  "end_date", "complete", "from_list")
+                  "end_date", "complete", "from_list", "sub_tasks")
     
     def to_representation(self, instance):
         return super().to_representation(instance)
     
-    def validate_assignments( self, data ):
+    def validate_assignments( self, value ):
         '''
             Validates the list o users passed.
             Should be a list of valid users otherwise returns error.
         '''
-        for user_id in data:
-            if not User.objects.get( pk=user_id ):
-                raise serializers.ValidationError(f'Error validating user accounts.')
+        temp = []
+        if not value:
+            # empty assignments, will assign only to creator
+            return value
 
-        return data
+        for user_id in value:
+            user = User.objects.get( pk=user_id )
+            if not user:
+                raise User.DoesNotExist
+            else:
+                temp.append(user)
+                
+        return temp
     
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -166,6 +191,15 @@ class TaskSrl(serializers.ModelSerializer):
         # updated assignments
         # check if the assignments already exist first
         # later create assignments for those that do not exist
+
+        for user in assignments:
+            try:
+                with transaction.atomic():
+                    user.assignments.create(task=instance)
+                    user.save()
+            except IntegrityError:
+                self.warning_messages.append(f'@{user.username} already has the task assigned.')
+                
 
         return instance
 
@@ -295,7 +329,10 @@ class TaskListSrl(serializers.ModelSerializer):
         return instance
 
     def get_tasks( self, obj ):
-    
+        '''
+            It gets the tasks from a list.
+            And filter the ones that belong to the current user
+        '''
         try:
             request = self.context.get("request")
             user = None
@@ -309,4 +346,3 @@ class TaskListSrl(serializers.ModelSerializer):
             return TaskSrl(tasks, many=True).data
         except Exception as e:
             raise e        
-

@@ -38,10 +38,16 @@ import {
   DELETE_TASK_REQUEST,
   DELETE_TASK_SUCCESS,
   DELETE_TASK_FAILURE,
+
+  // SELECT LIST
+  SELECT_LIST,
+  RESET_LIST_STORAGE,
 } from "../action_creators/action_types";
 
 const initState = {
   loading: false,
+  selectedList: 0, // keep track of which one the user is seeing
+  systemLists: [],
   lists: [],
   err: "",
 };
@@ -262,6 +268,18 @@ export const listsReducer = (state = initState, action) => {
         loading: false,
       };
     }
+    case SELECT_LIST: {
+      return {
+        ...state,
+        selectedList: action.payload,
+      };
+    }
+
+    // RESET LIST STORAGE
+    case RESET_LIST_STORAGE: {
+      return initState;
+    }
+
     default:
       return state;
   }

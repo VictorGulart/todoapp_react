@@ -11,6 +11,7 @@ url_user = reverse('user')
 user_data = {
             "username": "johndoe",
             "password": "12345",
+            "confirm_password": "12345",
             "email": "johndoe@gmail.com"
 }
 

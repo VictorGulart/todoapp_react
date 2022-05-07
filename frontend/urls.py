@@ -7,5 +7,11 @@ urlpatterns = [
         path("register/", views.register, name="register"),
         path("list/<int:pk>", views.listView, name="get-list"),
         path("task/<int:task_pk>", views.taskView, name="get-list"),
-        # path("task/<int:pk>", views.listView, name="get-task")
+
+
+
+
+        # temporary for component creation
+        path("nav/", views.test, name="nav-test"),
+        path("tmodal/", views.test, name="tmodal-test")
 ]

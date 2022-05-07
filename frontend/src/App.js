@@ -1,3 +1,5 @@
+import "./styles/App.css";
+
 // REDUX IMPORT
 import { configureStore } from "./redux/store";
 import { Provider } from "react-redux";
@@ -9,50 +11,28 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-// APP imports
-import "./styles/App.css";
-import NavBar from "./components/nav_bar/nav_bar.js";
-import ListsDisplay from "./components/lists_display/lists_display.js";
-import ListSlidePage from "./components/list_slide_page/list_slide_page";
-import TaskSlidePage from "./components/task_slide_page/task_slide_page";
-
-// APP AUTH imports
-import PrivateRoute from "./components/auth/privateRoute";
-import LoginPage from "./components/auth/login";
-import RegisterPage from "./components/auth/register";
-
-function Messages() {
-  const messages = [];
-
-  return (
-    <div className="message">
-      <span></span>
-    </div>
-  );
-}
+// APP AUTH
+import LoginPage from "./components/auth/login/LoginPage";
+import RegisterPage from "./components/auth/register/RegisterPage";
+import Home from "./components/home/Home";
+import Navigation from "./components/navigation/Navigation";
+import TaskModal from "./components/task_modal/TaskModal";
 
 function App() {
   return (
-    <div className="App">
-      <Messages />
+    <div className="flex w-full min-h-screen">
       <Router>
         <Switch>
-          <PrivateRoute exact path="/">
-            <NavBar />
-            <ListsDisplay />
-            <Route path="/list/:list_id">
-              {/* Special List component, for individual lists */}
-              <NavBar />
-              <ListSlidePage />
-            </Route>
-            <Route path="/task/:task_id">
-              <NavBar />
-              <TaskSlidePage />
-            </Route>
-          </PrivateRoute>
+          <Route exact path="/" component={Home}></Route>
           <Route path="/login" component={LoginPage}></Route>
           <Route path="/register" component={RegisterPage}></Route>
+
+          {/* route to test components */}
+          <Route path="/nav" component={Navigation}></Route>
+          <Route path="/tmodal" component={TaskModal}></Route>
+          {/* END */}
           <Route>
+            {/* Make 404 page */}
             <div>Opps... Page not Found!</div>
           </Route>
         </Switch>

@@ -51,7 +51,7 @@ export const userReducer = (state = initState, action) => {
       return {
         ...state,
         loading: false,
-        error: action.payload,
+        errors: action.payload,
       };
     case USER_LOGOUT_REQUEST:
       return {

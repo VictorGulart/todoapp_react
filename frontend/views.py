@@ -26,4 +26,8 @@ def listView( request, pk):
 def taskView( request, task_pk):
     return render( request, 'frontend/index.html' )
 
+def test( request ):
+    return render( request, 'frontend/index.html' )
+
+
 

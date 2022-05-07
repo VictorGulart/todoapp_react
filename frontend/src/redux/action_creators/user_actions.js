@@ -12,6 +12,8 @@ import {
   USER_CREATE_FAILURE,
 } from "./action_types";
 
+import { setErrors } from "./errors_actions";
+
 import { user_login, user_logout, user_register } from "./urls";
 
 export const fetchUser = (username, password) => {
@@ -34,11 +36,17 @@ export const fetchUser = (username, password) => {
         if (data.status === "success") {
           dispatch(fetchUserSuccess(data));
         } else if (data.status === "fail") {
-          dispatch(fetchUserFailure(data.message));
+          dispatch(fetchUserFailure());
+          let errors = {
+            form_related: [data.message],
+            fields: data.data.errors,
+          };
+          dispatch(setErrors(errors));
         }
       })
       .catch((err) => {
         console.log(err);
+        dispatch(setErrors(data.data.errors));
       });
   };
 };
@@ -56,10 +64,9 @@ export const fetchUserSuccess = (data) => {
   };
 };
 
-export const fetchUserFailure = (error) => {
+export const fetchUserFailure = () => {
   return {
     type: FETCH_USER_FAILURE,
-    payload: error,
   };
 };
 
@@ -145,7 +152,12 @@ export const fetchCreateUser = (user) => {
         if (data.status === "success") {
           dispatch(userCreateSuccess(data));
         } else if (data.status === "fail") {
-          dispatch(userCreateFailure(data.message));
+          dispatch(userCreateFailure());
+          let errors = {
+            form_related: [data.message],
+            fields: data.data.errors,
+          };
+          dispatch(setErrors(errors));
         }
       })
       .catch((err) => {
@@ -170,6 +182,5 @@ export const userCreateSuccess = (data) => {
 export const userCreateFailure = (err) => {
   return {
     type: USER_CREATE_FAILURE,
-    payload: err,
   };
 };

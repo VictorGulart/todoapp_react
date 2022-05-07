@@ -9,13 +9,21 @@ def custom_exception_handler(exc, context):
     res = exception_handler(exc, context)
 
     # Check code status
-    if res != None and res.status_code == 403: # FORBIDDEN
+    if res != None and res.status_code == 403 : # FORBIDDEN
         return Response(
             {
                 'status': 'error',
                 'message' : res.data['detail'].title(),
             },
             status = status.HTTP_403_FORBIDDEN
+        )
+    elif res != None and res.status_code == 401 : # FORBIDDEN
+        return Response(
+            {
+                'status': 'error',
+                'message' : res.data['detail'].title(),
+            },
+            status = status.HTTP_401_UNAUTHORIZED
         )
     return res
 

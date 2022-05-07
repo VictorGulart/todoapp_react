@@ -55,7 +55,6 @@ class TaskList(models.Model):
     def __str__(self):
         return self.title
 
-
 class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -66,6 +65,15 @@ class Task(models.Model):
     from_list = models.ForeignKey(
         TaskList, related_name="tasks", on_delete=models.CASCADE)
     users = models.ManyToManyField("auth.user", related_name="tasks", through=Assignment)
+    
 
     def __str__(self):
         return self.title
+
+class SubTask(models.Model):
+    title = models.CharField(max_length=200)
+    complete = models.BooleanField(default=False)
+    from_task = models.ForeignKey(
+        Task, related_name="sub_tasks", on_delete=models.CASCADE 
+    )
+

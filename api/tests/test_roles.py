@@ -50,9 +50,7 @@ class TestAssignments( APITestCase ):
         
         # pass the role - OWNER, EDITOR, WORKER, VIEWER
         data ={
-            'data': {
-                'role': 'VIEWER'
-            }
+            'role': 'VIEWER'
         }
 
         res = self.client.post( url_create_role, data, format='json' )
@@ -73,19 +71,15 @@ class TestAssignments( APITestCase ):
 
         # create role
         data = {
-            'data' : {
-                'role':'VIEWER'
-            }
+            'role':'VIEWER'
         }
         res = self.client.post( url_create_role, data, format='json' )
 
         # update role
         data = {
-            'data' : {
-                'role':'EDITOR'
-            }
+            'role':'EDITOR'
         }
-        res = self.client.post( url_update_role, data, format='json' )
+        res = self.client.patch( url_update_role, data, format='json' )
 
         self.assertEqual( res.status_code, 200 )
         self.assertEqual( res.data['status'], 'success' )
@@ -132,7 +126,10 @@ class TestAssignments( APITestCase ):
         '''
 
         user, token = create_second_user( self )
-        res = self.client.post( url_create_role, format='json' )
+        data = {
+            "role":"VIEWER"
+        }
+        res = self.client.post( url_create_role, data, format='json' )
 
         # Check Creation
         self.assertEqual( res.status_code, 201 )
@@ -143,12 +140,10 @@ class TestAssignments( APITestCase ):
         tear_down_credentials( self ) # remove credentials
 
         data ={
-            'data': {
-                'role': 'EDITOR'
-            }
+            'role': 'EDITOR'
         }
 
-        res = self.client.post( url_update_role, data, format='json' ) 
+        res = self.client.patch( url_update_role, data, format='json' ) 
 
         self.assertEqual( res.status_code, 403 ) # goes to default custom exception handler
         self.assertEqual( res.data['status'], 'error' )
@@ -163,7 +158,10 @@ class TestAssignments( APITestCase ):
         '''
 
         user, token = create_second_user( self )
-        res = self.client.post( url_create_role, format='json' )
+        data = {
+            "role":"VIEWER"
+        }
+        res = self.client.post( url_create_role, data, format='json' )
 
         # Check Creation
         self.assertEqual( res.status_code, 201 )

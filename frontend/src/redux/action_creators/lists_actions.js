@@ -21,6 +21,10 @@ import {
   DELETE_LIST_REQUEST,
   DELETE_LIST_SUCCESS,
   DELETE_LIST_FAILURE,
+  // SELECTED LIST
+  SELECT_LIST,
+  SELETED_LIST_RESET,
+  RESET_LIST_STORAGE,
 } from "../action_creators/action_types";
 
 import {
@@ -35,6 +39,8 @@ const default_list = {
   title: "New List",
   roles: [],
 };
+
+import { setErrors } from "./errors_actions";
 
 export const fetchCreateList = (token) => {
   return (dispatch) => {
@@ -60,9 +66,12 @@ export const fetchCreateList = (token) => {
           dispatch(createListFailure(data.message));
         } else if (data.status === "error") {
           console.log("Something worse happened.");
-          console.log(res.status);
-          console.log(data.message);
-          dispatch(createListFailure(data.message));
+          dispatch(createListFailure());
+          let errors = {
+            system: [data.message],
+            fields: data.data.errors,
+          };
+          dispatch(setErrors(errors));
         }
       })
       .catch((err) => {
@@ -299,5 +308,19 @@ export const deleteListFailure = (errMsg) => {
   return {
     type: DELETE_LIST_FAILURE,
     payload: errMsg,
+  };
+};
+
+export const selectList = (list_id) => {
+  return {
+    type: SELECT_LIST,
+    payload: list_id,
+  };
+};
+
+// reset the storage on logout
+export const resetListStorage = () => {
+  return {
+    type: RESET_LIST_STORAGE,
   };
 };

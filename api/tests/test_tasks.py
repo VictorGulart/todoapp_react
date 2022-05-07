@@ -14,6 +14,8 @@ from django.contrib.auth.models import User
 
 import copy
 
+import pdb
+
 
 class TestTasks( APITestCase ):
     def setUp( self, *args, **kwargs ):
@@ -41,7 +43,6 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('data', None) )
         self.assertIsNotNone( res.data.get('message', None) )
         self.assertIsNotNone( res.data['data'].get('task', None) )
-
     
     def test_create_task_default_owner( self ):
         '''
@@ -152,6 +153,9 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('warning_messages', None) )
         self.assertIsNotNone( res.data.get('message', None) )
     
+    def test_create_task_with_subtasks( self ):
+        ...
+
     def test_update_task_title_desc( self ):
         '''
             Update title and description of the task
@@ -166,7 +170,7 @@ class TestTasks( APITestCase ):
         data['title'] = "New Title"
         data['description']  = "New Description"
 
-        res = self.client.post( url_update_task, data, format='json' )
+        res = self.client.patch( url_update_task, data, format='json' )
 
         # Assertions
         self.assertEqual( res.data.get('status', None), 'success' )
@@ -189,7 +193,7 @@ class TestTasks( APITestCase ):
         data['title'] = "New Title"
         data['description']  = "New Description"
 
-        res = self.client.post( reverse( 'update-task', kwargs={'pk':2} ) , data, format='json' )
+        res = self.client.patch( reverse( 'update-task', kwargs={'pk':2} ) , data, format='json' )
 
         # Assertions
         self.assertEqual( res.data.get('status', None), 'error' )
@@ -218,7 +222,7 @@ class TestTasks( APITestCase ):
         data['description']  = "New Description"
         data['assignments'] = [] 
         
-        res = self.client.post( url_update_task , data, format='json' )
+        res = self.client.patch( url_update_task , data, format='json' )
 
         # Assertions
         self.assertEqual( res.data.get('status', None), 'success' )
@@ -231,7 +235,7 @@ class TestTasks( APITestCase ):
 
     def test_complete_task( self ):
         '''
-            Completes task and check for end_date value to be changed
+            Completes task
         '''
 
         # Create task
@@ -243,7 +247,7 @@ class TestTasks( APITestCase ):
         data = copy.deepcopy( res.data['data']['task'] )
         data['complete'] = True 
         
-        res = self.client.post( url_update_task , data, format='json' )
+        res = self.client.patch( url_update_task , data, format='json' )
 
         # Assertions
         self.assertEqual( res.data.get('status', None), 'success' )
@@ -251,7 +255,6 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('data', None) )
         self.assertIsNotNone( res.data['data'].get('task', None) )
         self.assertTrue( res.data['data']['task']['complete'] )
-        self.assertNotEqual( res.data['data']['task']['end_date'], current_end )
 
     def test_update_add_another_assignment( self ):
         '''
@@ -271,7 +274,7 @@ class TestTasks( APITestCase ):
         data = copy.deepcopy( res.data['data']['task'] )
         data['assignments'] = [ 3 ] 
         
-        res = self.client.post( url_update_task , data, format='json' )
+        res = self.client.patch( url_update_task , data, format='json' )
 
         # Assertions
         self.assertEqual( res.data.get('status', None), 'success' )
@@ -293,7 +296,6 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('data', None) )
         self.assertIsNotNone( res.data['data'].get('task', None) )
 
-   
     def test_try_to_get_a_task( self ):
         '''
             Tries to get a task that is not assigned to the user
@@ -349,7 +351,6 @@ class TestTasks( APITestCase ):
         self.assertIsNone( res.data.get('data', None) )
 
         set_up_credentials( self )
-
 
 
 

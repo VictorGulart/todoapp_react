@@ -14,6 +14,8 @@ from accounts.api import RegisterAPI, LoginAPI, GetUserAPI
 # Settings
 from accounts.tests.settings import url_register, url_login, user_data
 
+import pdb
+
 
 class UserRegistrationTest( APITestCase ):
     def setUp( self ):
@@ -88,7 +90,8 @@ class UserRegistrationTest( APITestCase ):
         self.assertEqual( res.data['status'], 'fail' )
         self.assertIn('email', res.data['data']['errors'])
         self.assertIn('password', res.data['data']['errors'])
-        self.assertEqual( len(res.data['data']['errors']), 2 )
+        self.assertIn('confirm_password', res.data['data']['errors'])
+        self.assertEqual( len(res.data['data']['errors']), 3 )
 
     def test_email_username_create_fail( self ):
         '''
@@ -103,7 +106,7 @@ class UserRegistrationTest( APITestCase ):
         self.assertEqual( res.data['status'], 'fail' )
         self.assertIn('email', res.data['data']['errors'])
         self.assertIn('username', res.data['data']['errors'])
-        self.assertEqual( len(res.data['data']['errors']), 2 )
+        self.assertEqual( len(res.data['data']['errors']), 3 )
 
     def test_username_pass_create_fail( self ):
         '''
@@ -118,7 +121,8 @@ class UserRegistrationTest( APITestCase ):
         self.assertEqual( res.data['status'], 'fail' )
         self.assertIn('username', res.data['data']['errors'])
         self.assertIn('password', res.data['data']['errors'])
-        self.assertEqual( len(res.data['data']['errors']), 2 )
+        self.assertIn('confirm_password', res.data['data']['errors'])
+        self.assertEqual( len(res.data['data']['errors']), 3 )
     
     def test_username_pass_email_create_fail( self ):
         '''
@@ -133,7 +137,8 @@ class UserRegistrationTest( APITestCase ):
         self.assertIn('username', res.data['data']['errors'])
         self.assertIn('password', res.data['data']['errors'])
         self.assertIn('email', res.data['data']['errors'])
-        self.assertEqual( len(res.data['data']['errors']), 3 )
+        self.assertIn('confirm_password', res.data['data']['errors'])
+        self.assertEqual( len(res.data['data']['errors']), 4 )
 
     def test_create_duplicate_user_username( self ):
         '''
