@@ -24,7 +24,7 @@ React.js, Tailwindcss, Django, Heroku
 <img src="imgs/register_page.png" width="350" alt="Register Page">
 
 ### Home Page
-<img src="imgs/imgs/home_page.png" width="350" alt="Home Page">
+<img src="imgs/home_page.png" width="350" alt="Home Page">
 
 ### Side Menu
 <img src="imgs/side_menu.png" width="350" alt="Side Menu">
