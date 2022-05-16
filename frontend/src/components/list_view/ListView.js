@@ -1,15 +1,18 @@
 import { connect } from "react-redux";
 import { useState, useEffect } from "react";
 import TaskModal from "../task_modal/TaskModal";
-import { fetchLists } from "../../redux/action_creators/lists_actions";
+import {
+  fetchCreateList,
+  fetchLists,
+} from "../../redux/action_creators/lists_actions";
+import {
+  fetchCreateTask,
+  fetchDeleteTask,
+  fetchUpdateTask,
+} from "../../redux/action_creators/task_actions";
 
-function TaskView({ task, handleEdit, handleDelete, handleComplete }) {
+function TaskView({ token, task, handleEdit, handleDelete, handleUpdate }) {
   // for now just keep this state, later I'm using Redux
-
-  const completeTask = () => {
-    // dispatch
-    console.log("task completed");
-  };
 
   return (
     <div className="flex w-full justify-between rounded-2xl bg-emerald-300 p-3">
@@ -21,7 +24,9 @@ function TaskView({ task, handleEdit, handleDelete, handleComplete }) {
             type="checkbox"
             name=""
             id=""
-            onClick={completeTask}
+            onClick={(e) => {
+              handleUpdate(token, task);
+            }}
           />
         </div>
         <div className="flex items-center justify-center">
@@ -37,7 +42,7 @@ function TaskView({ task, handleEdit, handleDelete, handleComplete }) {
             className="fa-solid fa-trash hover:text-slate-500"
             onClick={(e) => {
               console.log("deleting ", task);
-              handleDelete(task);
+              handleDelete(token, task);
             }}
           ></i>
         </div>
@@ -46,9 +51,17 @@ function TaskView({ task, handleEdit, handleDelete, handleComplete }) {
   );
 }
 
-function ListView({ lists, selectedList }) {
+function ListView({
+  token,
+  lists,
+  selectedList,
+  createTask,
+  deleteTask,
+  updateTask,
+}) {
   const [editing, setEditing] = useState({ taskId: null, edit: false });
   const [list, setList] = useState({
+    id: null,
     title: "",
     description: "",
     tasks: [],
@@ -59,43 +72,21 @@ function ListView({ lists, selectedList }) {
   });
 
   useEffect(() => {
+    // Set the selected list if there is one
     if (lists && lists[selectedList] !== undefined) {
       setList(lists[selectedList]);
     }
   }, [lists]);
 
-  const createTask = () => {
-    setList({
-      ...list,
-      tasks: [
-        ...list.tasks,
-        { ...tempTask, id: Math.round(Math.random() * 1000), title: "Onions" },
-      ],
-    });
-  };
-
-  const deleteTask = (oldTask) => {
-    let newTasks = list.tasks.filter((task) => {
-      if (task.id != oldTask.id) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-
-    setList({
-      ...list,
-      tasks: newTasks,
-    });
-  };
-
   let tasks = list.tasks.map((task, idx) => {
     return (
       <TaskView
+        token={token}
         key={idx}
         task={task}
         handleEdit={setEditing}
         handleDelete={deleteTask}
+        handleUpdate={updateTask}
       />
     );
   });
@@ -127,7 +118,9 @@ function ListView({ lists, selectedList }) {
         <div className="hidden xs:block mt-4">
           <i
             className="text-4xl text-emerald-600 fa-solid fa-circle-plus hover:text-emerald-700"
-            onClick={createTask}
+            onClick={(e) => {
+              createTask(token, list.id);
+            }}
           ></i>
         </div>
       </div>
@@ -158,6 +151,17 @@ const mapDispatchToProps = (dispatch) => {
   return {
     getLists: (token) => {
       dispatch(fetchLists(token));
+    },
+    createTask: (token, list_id) => {
+      dispatch(fetchCreateTask(token, list_id));
+    },
+
+    deleteTask: (token, task) => {
+      dispatch(fetchDeleteTask(token, task));
+    },
+
+    updateTask: (token, task) => {
+      dispatch(fetchUpdateTask(token, task));
     },
   };
 };

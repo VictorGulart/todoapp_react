@@ -44,7 +44,7 @@ import { setErrors } from "./errors_actions";
 
 export const fetchCreateList = (token) => {
   return (dispatch) => {
-    // record list creation request
+    // for now it creates a default list
     dispatch(createListRequest());
 
     fetch(create_list, {

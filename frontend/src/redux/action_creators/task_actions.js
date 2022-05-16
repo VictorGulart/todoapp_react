@@ -93,7 +93,7 @@ export const fetchUpdateTask = (token, task) => {
     dispatch(updateTaskRequest());
 
     fetch(update_task + `${task.id}/`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `token ${token}`,
         "Content-Type": "application/json",
