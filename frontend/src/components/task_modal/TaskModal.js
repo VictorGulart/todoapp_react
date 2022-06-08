@@ -1,32 +1,15 @@
 import { connect } from "react-redux";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import SubTasks from "./SubTasks";
 
-// function TaskModal({ taskId, fetchTaskId, handleTaskEdit }) {
-function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
-  // NOTES FOR THIS COMPONENT
-  // Task Modal will fetch the task, with the ID it receives from ListView
-  // need to include a fetch dispatch to get the friends to assign to
-
-  // TEMPORARY
-  // Receiving a task detail from listview - after will be an API call
-
+function TaskModal({ task: origTask, handleTaskEdit }) {
   const closeModal = (e) => {
-    // Check if the task changes were saved
-    console.log("check if changes were saved!!");
     // Hide the modal
     handleTaskEdit({ edit: false, taskId: null });
   };
 
-  let subTasks, assignments;
-  let initTask = {
-    title: "",
-    notes: "",
-    completed: false,
-    start_date: null,
-    due_date: null,
-    assigned_to: [], // a list of user objects
-    subtasks: [],
-  };
+  let assignments;
+
   let initUser = {
     id: "2",
     name: "Doe",
@@ -34,13 +17,11 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
     username: "TheDoe",
   };
 
-  // Redux State (should be deleted)
-  const [task, setTask] = useState(origTask || initTask);
-  const [saved, setSaved] = useState(true); // store task saved state
+  const [task, setTask] = useState(origTask);
+
   // Internal State
   const taskRef = useRef(null);
   const [assignInput, setAssignInput] = useState({ hidden: true, value: "" });
-  const [subTaskFocus, setSubTaskFocus] = useState(false);
 
   const handleInput = (e) => {
     e.target.style.height = "auto";
@@ -73,14 +54,6 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
     }
   }, [assignInput.hidden]);
 
-  useEffect(() => {
-    if (subTaskFocus === true) {
-      document.querySelector("#sub-tasks").lastChild.firstChild.focus();
-    } else if (subTaskFocus === false) {
-      document.querySelector("#sub-tasks").lastChild.firstChild.blur();
-    }
-  }, [subTaskFocus]);
-
   const setDueDate = () => {
     setTask({
       ...task,
@@ -108,44 +81,6 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
           ? "0" + new Date().getDate()
           : new Date().getDate()
       }`,
-    });
-  };
-
-  // CHANGE ON API CALL
-  const addSubTask = () => {
-    setTask({
-      ...task,
-      subtasks: [
-        ...task.subtasks,
-        {
-          id:
-            task.subtasks.length !== 0
-              ? task.subtasks[task.subtasks.length - 1].id + 1
-              : 0,
-          title: "",
-        },
-      ],
-    });
-    setSubTaskFocus(true);
-  };
-
-  const delSubTask = (e) => {
-    let newSubs = task.subtasks;
-    newSubs.splice(e.target.parentNode.id, 1);
-    setTask({
-      ...task,
-      subtasks: newSubs,
-    });
-  };
-
-  const removeTargetSubTask = (target) => {
-    let newSubs = task.subtasks.filter((subtask) => {
-      return subtask.id != target.id;
-    });
-
-    setTask({
-      ...task,
-      subtasks: newSubs,
     });
   };
 
@@ -177,11 +112,11 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
         hideAssignInput();
       } else {
         // create assignment
-        let assigned_to = task.assigned_to;
+        let assigned_to = task.assignments;
         assigned_to.push(initUser);
         setTask({
           ...task,
-          assigned_to: assigned_to,
+          assignments: assigned_to,
         });
         hideAssignInput();
       }
@@ -190,12 +125,12 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
 
   // implement
   const delAssignment = (e) => {
-    let assigned_to = task.assigned_to;
+    let assigned_to = task.assignments;
     assigned_to.splice(e.target.parentNode.id, 1);
 
     setTask({
       ...task,
-      assigned_to: assigned_to,
+      assignments: assigned_to,
     });
   };
 
@@ -205,68 +140,15 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
     console.log("saving task");
   };
 
-  // subtasks array
-  subTasks = task.subtasks.map((subtask, idx) => {
-    return (
-      <div
-        id={idx} //parent will keep the array index
-        key={`subtask-${idx}`}
-        className="w-full flex items-center justify-center hover:bg-slate-100/[0.5] cursor-default rounded-md p-2"
-      >
-        <input
-          id={subtask.id}
-          type="text"
-          className="w-full rounded-md bg-slate-100/[0] placeholder:text-slate-600 outline-none "
-          onFocus={(e) => {
-            e.target.parentNode.classList.add("bg-slate-100/[0.5]");
-          }}
-          onBlur={(e) => {
-            e.target.parentNode.classList.remove("bg-slate-100/[0.5]");
-            setSubTaskFocus(false);
-          }}
-          onChange={(e) => {
-            let newSubs = task.subtasks;
-            newSubs[e.target.parentNode.id].title = e.target.value;
-            setTask({
-              ...task,
-              subtasks: newSubs,
-            });
-          }}
-          onKeyDown={(e) => {
-            // ENTER pressing when subtask has focus
-            if (!e.repeat && e.key === "Enter") {
-              e.preventDefault();
-
-              // Delete if not edited
-              if (e.target.value === "") {
-                removeTargetSubTask(e.target);
-              } else {
-                // Add a new subtask (like a continous system)
-                setSubTaskFocus(false);
-              }
-            }
-          }}
-          value={subtask.title}
-          placeholder="New Task"
-        />
-
-        <i
-          className="justify-end fa-solid fa-x text-xs pt-1 cursor-pointer"
-          onClick={delSubTask}
-        ></i>
-      </div>
-    );
-  });
-
   // assignments array
-  assignments = task.assigned_to.map((assignment, idx) => {
+  assignments = task.assignments.map((assignment, idx) => {
     return (
       <div
         id={idx}
         key={`assign-${idx}`}
         className="text-slate-600 p-2 flex items-center justify-center gap-x-2 bg-slate-100/[.3] rounded-md"
       >
-        <span className="text-center">{assignment.name}</span>
+        <span className="text-center">{assignment}</span>
         <i
           className="justify-end cursor-pointer fa-solid fa-x text-xs pt-1"
           onClick={delAssignment}
@@ -293,6 +175,7 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
             ></i>
           </span>
         </div>
+
         {/* title */}
         <div className="w-full">
           <input
@@ -308,23 +191,10 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
             }}
           />
         </div>
+
         {/* sub tasks */}
-        <div className="w-full min-h-[3rem] flex flex-col items-center justify-center gap-y-1">
-          {/* sub tasks will go where */}
-          <div
-            id={"sub-tasks"}
-            className="w-full max-h-32 overflow-y-auto xs:max-h-64"
-          >
-            {subTasks}
-          </div>
-          <div
-            className="flex items-center justify-center gap-x-2 cursor-default p-2 rounded-md hover:text-slate-800 hover:bg-slate-100/[0.5]"
-            onClick={addSubTask}
-          >
-            <i className="fa-solid fa-circle-plus"></i>
-            <div className="">Add Subtask</div>
-          </div>
-        </div>
+        <SubTasks task={task} setTask={setTask} />
+
         {/* begin and due date */}
         <div className="w-full flex items-center justify-between">
           <div className="">
@@ -380,6 +250,7 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
             )}
           </div>
         </div>
+
         {/* notes */}
         <div className="w-full">
           <textarea
@@ -390,6 +261,7 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
             onInput={handleInput}
           ></textarea>
         </div>
+
         {/* assigning */}
         <div className="w-full flex items-center justify-start gap-x-2 flex-wrap ">
           <div className="flex gap-x-1">{assignments}</div>
@@ -413,6 +285,7 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
             <span className="">Assign to</span>
           </div>
         </div>
+
         {/* save button */}
         <div className="w-full flex justify-end px-3">
           <button
@@ -427,7 +300,9 @@ function TaskModal({ task: origTask, taskId, handleTaskEdit }) {
   );
 }
 
-const mapStateToProps = (state) => ({});
+const mapStateToProps = (state) => ({
+  list: state.listsReducer.lists[state.listsReducer.selectedList],
+});
 
 const mapDispatchToProps = () => {
   return {};

@@ -2,8 +2,9 @@ import { connect } from "react-redux";
 import { useState, useEffect } from "react";
 import TaskModal from "../task_modal/TaskModal";
 import {
-  fetchCreateList,
   fetchLists,
+  fetchUpdateList,
+  selectList,
 } from "../../redux/action_creators/lists_actions";
 import {
   fetchCreateTask,
@@ -41,7 +42,7 @@ function TaskView({ token, task, handleEdit, handleDelete, handleUpdate }) {
           <i
             className="fa-solid fa-trash hover:text-slate-500"
             onClick={(e) => {
-              console.log("deleting ", task);
+              // console.log("deleting ", task);
               handleDelete(token, task);
             }}
           ></i>
@@ -55,10 +56,13 @@ function ListView({
   token,
   lists,
   selectedList,
+  selectAList,
+  updateList,
   createTask,
   deleteTask,
   updateTask,
 }) {
+  const [listTitle, setListTitle] = useState("");
   const [editing, setEditing] = useState({ taskId: null, edit: false });
   const [list, setList] = useState({
     id: null,
@@ -72,11 +76,28 @@ function ListView({
   });
 
   useEffect(() => {
-    // Set the selected list if there is one
+    // Just check if there is a selectedList
+    // if not set a the first on the list
+    if (!selectedList && lists && lists[0] !== undefined) {
+      // There was no list selected, therefore selecting the first one
+      setList(lists[0]);
+      selectAList(lists[0]["id"]);
+    } else if (selectedList && lists && lists[selectedList] !== undefined) {
+      setList(lists[selectedList]);
+    }
+    // Otherwise default list is already set
+  }, [lists]);
+
+  useEffect(() => {
+    // Change set the list to the new seleceted one
     if (lists && lists[selectedList] !== undefined) {
       setList(lists[selectedList]);
     }
-  }, [lists]);
+  }, [selectedList]);
+
+  useEffect(() => {
+    setListTitle(list["title"]);
+  }, [list]);
 
   let tasks = list.tasks.map((task, idx) => {
     return (
@@ -103,9 +124,19 @@ function ListView({
             className="w-full py-3 text-emerald-600 text-3xl font-bold bg-transparent outline-none focus:outline-0"
             type="text"
             onChange={(e) => {
-              setList({ ...list, title: e.target.value });
+              // Set to the new value
+              setListTitle(e.target.value);
             }}
-            value={list.title}
+            onKeyPress={(e) => {
+              // If the key pressed is the Enter
+              if (e.key === "Enter") {
+                // Save the new list - API call
+                let tempList = list;
+                tempList["title"] = listTitle;
+                updateList(token, tempList);
+              }
+            }}
+            value={listTitle}
           />
         </div>
         <div className="flex flex-col gap-y-5 w-full p-2">{tasks}</div>
@@ -141,6 +172,8 @@ function ListView({
 const mapStateToProps = (state) => {
   return {
     // Get the list
+    // MAYBE: instead of passing all the lists,
+    // only pass the selected one
     lists: state.listsReducer.lists,
     selectedList: state.listsReducer.selectedList,
     token: state.fetchReducer.token,
@@ -152,6 +185,9 @@ const mapDispatchToProps = (dispatch) => {
     getLists: (token) => {
       dispatch(fetchLists(token));
     },
+    updateList: (token, list) => {
+      dispatch(fetchUpdateList(token, list));
+    },
     createTask: (token, list_id) => {
       dispatch(fetchCreateTask(token, list_id));
     },
@@ -162,6 +198,9 @@ const mapDispatchToProps = (dispatch) => {
 
     updateTask: (token, task) => {
       dispatch(fetchUpdateTask(token, task));
+    },
+    selectAList: (list_id) => {
+      dispatch(selectList(list_id));
     },
   };
 };

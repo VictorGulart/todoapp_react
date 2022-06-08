@@ -46,7 +46,7 @@ import {
 
 const initState = {
   loading: false,
-  selectedList: 0, // keep track of which one the user is seeing
+  selectedList: undefined, // keep track of which one the user is seeing
   systemLists: [],
   lists: [],
   err: "",
@@ -269,9 +269,13 @@ export const listsReducer = (state = initState, action) => {
       };
     }
     case SELECT_LIST: {
+      let idx = state.lists.findIndex((list) => {
+        return list["id"] == action.payload;
+      });
+
       return {
         ...state,
-        selectedList: action.payload,
+        selectedList: idx,
       };
     }
 

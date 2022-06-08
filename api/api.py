@@ -239,6 +239,9 @@ class TaskLists(APIView):
                 }
             )
 
+    # def patch(self, request, pk, format=None):
+
+
 class TaskListView(APIView):
     def get(self, request, pk, format=None):
         """ 

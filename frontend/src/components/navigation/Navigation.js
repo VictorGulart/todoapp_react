@@ -8,12 +8,17 @@ import { Redirect } from "react-router-dom";
 
 // REDUX
 import { userLogOut } from "../../redux/action_creators/user_actions";
+import {
+  fetchCreateList,
+  selectList,
+} from "../../redux/action_creators/lists_actions";
 
-function Navigation({ lists, token, logoutUser }) {
+function Navigation({ lists, token, logoutUser, createList }) {
   const sideMenu = useRef();
 
   // EDIT LATER -> SIDE MENU
   const systemLists = [
+    // This need to be implemented on the backend
     { id: "0", title: "Day" },
     { id: "1", title: "Reminders" },
     { id: "2", title: "Notes" },
@@ -33,20 +38,22 @@ function Navigation({ lists, token, logoutUser }) {
   });
 
   const closeMenu = () => {
-    // sideMenu.current.style.left = "-100%";
+    // Closes the side menu
     sideMenu.current.classList.remove("left-0");
     sideMenu.current.classList.add("left-[-100%]");
   };
 
   const openMenu = () => {
-    // sideMenu.current.style.left = "0%";
+    // Opens the side menu
     sideMenu.current.classList.remove("left-[-100%]");
     sideMenu.current.classList.add("left-0");
   };
 
   const addList = () => {
-    console.log("adding a new list");
-    setLists([...lists, { id: "4", title: "New List" }]);
+    // Redux & API call to create a new list
+    // At the moment the list created is by default
+    console.log("New List being created.");
+    createList(token);
   };
 
   return (
@@ -194,6 +201,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     logoutUser: (token) => {
       dispatch(userLogOut(token));
+    },
+    createList: (token) => {
+      dispatch(fetchCreateList(token));
     },
   };
 };

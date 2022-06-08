@@ -209,7 +209,7 @@ export const fetchUpdateList = (token, list) => {
 
     // console.log(update_list + list.id + "/");
     fetch(update_list + list.id + "/", {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: "token " + token,
         "Content-Type": "application/json",
@@ -312,6 +312,8 @@ export const deleteListFailure = (errMsg) => {
 };
 
 export const selectList = (list_id) => {
+  // Internal Redux List Selection
+  // NO API calls
   return {
     type: SELECT_LIST,
     payload: list_id,

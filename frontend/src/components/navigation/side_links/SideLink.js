@@ -1,11 +1,7 @@
 import { connect } from "react-redux";
+import { selectList } from "../../../redux/action_creators/lists_actions";
 
-function SideLink({ listId, text }) {
-  const getList = () => {
-    console.log("getting list ", text);
-    console.log("the id is ", listId);
-  };
-
+function SideLink({ listId, text, selectAList }) {
   const handleDragStart = (e) => {
     e.target.classList.add("dragging");
   };
@@ -21,7 +17,9 @@ function SideLink({ listId, text }) {
       draggable="true"
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onClick={getList}
+      onClick={() => {
+        selectAList(listId);
+      }}
     >
       <span className="text-lg text-slate-600 pointer-events-none">{text}</span>
     </div>
@@ -30,8 +28,12 @@ function SideLink({ listId, text }) {
 
 const mapStateToProps = (state) => ({});
 
-const mapDispatchToProps = () => {
-  return {};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    selectAList: (list_id) => {
+      dispatch(selectList(list_id));
+    },
+  };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SideLink);
