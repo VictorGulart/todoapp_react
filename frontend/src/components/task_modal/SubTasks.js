@@ -42,7 +42,7 @@ const SubTask = ({
 
   return (
     <div
-      id={subtask.id} //parent will keep the array index
+      id={subtask.title} //parent will keep the array index
       key={`subtask-${subtask.id}`}
       className="w-full flex items-center justify-center hover:bg-slate-100/[0.5] cursor-default rounded-md p-2"
     >
@@ -108,9 +108,9 @@ const SubTasks = () => {
   };
   let subtasks;
 
-  const delSubTask = (delId) => {
+  const delSubTask = (taskTitle) => {
     let newSubs = task.sub_tasks.filter((sub) => {
-      return parseInt(sub.id) !== parseInt(delId);
+      return parseInt(sub.title) !== parseInt(taskTitle);
     });
 
     newSubs = setTask({
@@ -133,11 +133,7 @@ const SubTasks = () => {
   // CHANGE ON API CALL
   const addSubTask = () => {
     let subtask = initTask;
-    if (task.sub_tasks.length > 0) {
-      subtask.id = task.sub_tasks[task.sub_tasks.length - 1].id + 1;
-    } else {
-      subtask.id = 0; // get the current length
-    }
+
     setTask({
       ...task,
       sub_tasks: [...task.sub_tasks, subtask],

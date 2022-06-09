@@ -55,7 +55,7 @@ class TestAssignments( APITestCase ):
             'from_list': 1
         }
         res = self.client.post( url_create_assignment, data, format='json')
-         
+        set_trace() 
         self.assertEqual( res.status_code, 201 )
         self.assertEqual( res.data['status'], 'success' )
         self.assertIsNotNone( res.data.get('data', None) )

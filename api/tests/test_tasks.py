@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 
 import copy
 
-import pdb
+from pdb import set_trace
 
 
 class TestTasks( APITestCase ):
@@ -30,6 +30,10 @@ class TestTasks( APITestCase ):
         
         self.client.post( url_create_list, list_data, format='json' ) # create main list
 
+        # Second user
+        self.second_user, self.second_user_token = create_second_user( self ) 
+
+
     def test_create_task( self ):
         ''' 
             Test task creation.
@@ -43,6 +47,8 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('data', None) )
         self.assertIsNotNone( res.data.get('message', None) )
         self.assertIsNotNone( res.data['data'].get('task', None) )
+        self.assertIsNotNone( res.data['data']['task'].get('sub_tasks', None) )
+        self.assertNotEqual( len(res.data['data']['task'].get('sub_tasks', None)), 0 )
     
     def test_create_task_default_owner( self ):
         '''
@@ -67,7 +73,7 @@ class TestTasks( APITestCase ):
         user, token = create_second_user( self )
         
         data = copy.deepcopy( task_data )
-        data['assignments'] = [ 2 ]
+        data['assignments'] = [ {'user':2} ]
 
         change_credentials( self, token )
         res = self.client.post( url_create_task, data, format='json' )
@@ -139,8 +145,7 @@ class TestTasks( APITestCase ):
         user, token = create_second_user( self )
 
         data = copy.deepcopy( task_data )
-        data['assignments'].append( 2 ) # add user
-
+        data['assignments'].append( {'user':2} ) # add user
         res = self.client.post( url_create_task, data, format='json' )
 
         user = User.objects.get( pk=2 )
@@ -153,8 +158,37 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('warning_messages', None) )
         self.assertIsNotNone( res.data.get('message', None) )
     
-    def test_create_task_with_subtasks( self ):
-        ...
+    def test_update_task_subtask_assignment( self ):
+        ''' 
+            Test task update a task
+            by adding a subtask and an assignment.
+        '''
+
+        # create default task
+        res = self.client.post( url_create_task, task_data, format='json' )
+
+        # add a new subtask
+        data = copy.deepcopy(task_data)
+        data['sub_tasks'].append({\
+            'title': "new subtask2",\
+            'complete':False })
+        data['assignments'].append({\
+            'user': 2})
+
+
+        res = self.client.patch( url_update_task, data, format='json' )
+
+        set_trace()
+
+        self.assertEqual( res.status_code, 201 )
+        self.assertEqual( res.data.get('status'), 'success' )
+        self.assertIsNotNone( res.data.get('data', None) )
+        self.assertIsNotNone( res.data.get('message', None) )
+        self.assertIsNotNone( res.data['data'].get('task', None) )
+        self.assertIsNotNone( res.data['data']['task'].get('sub_tasks', None) )
+        self.assertNotEqual( len(res.data['data']['task'].get('sub_tasks', None)), 1 )
+   
+        
 
     def test_update_task_title_desc( self ):
         '''
@@ -163,7 +197,6 @@ class TestTasks( APITestCase ):
 
         # Create task
         res = self.client.post( url_create_task, task_data, format='json' )
-
         # update task
         data = copy.deepcopy( res.data['data']['task'] )
 
@@ -171,7 +204,6 @@ class TestTasks( APITestCase ):
         data['description']  = "New Description"
 
         res = self.client.patch( url_update_task, data, format='json' )
-
         # Assertions
         self.assertEqual( res.data.get('status', None), 'success' )
         self.assertIsNotNone( res.data.get('data', None) )
@@ -210,7 +242,7 @@ class TestTasks( APITestCase ):
 
         user, token = create_second_user( self )
         data = copy.deepcopy( task_data )
-        data['assignments'] = [2]
+        data['assignments'] = [{'user':2}]
 
         # Create task
         res = self.client.post( url_create_task, data, format='json' )
@@ -240,15 +272,12 @@ class TestTasks( APITestCase ):
 
         # Create task
         res = self.client.post( url_create_task, task_data, format='json' )
-
-        current_end = res.data['data']['task']['end_date']
-
         # update task
         data = copy.deepcopy( res.data['data']['task'] )
         data['complete'] = True 
         
         res = self.client.patch( url_update_task , data, format='json' )
-
+        
         # Assertions
         self.assertEqual( res.data.get('status', None), 'success' )
         self.assertIsNotNone( res.data.get('message', None) )
@@ -267,12 +296,12 @@ class TestTasks( APITestCase ):
 
         # Create task with 2nd user
         data = copy.deepcopy( task_data )
-        data['assignments'] = [ 2 ] 
+        data['assignments'] = [ {"user": 2} ] 
         res = self.client.post( url_create_task, data, format='json' )
 
         # Update task
         data = copy.deepcopy( res.data['data']['task'] )
-        data['assignments'] = [ 3 ] 
+        data['assignments'] = [ {"user": 3} ] 
         
         res = self.client.patch( url_update_task , data, format='json' )
 
@@ -295,6 +324,7 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data.get('message', None) )
         self.assertIsNotNone( res.data.get('data', None) )
         self.assertIsNotNone( res.data['data'].get('task', None) )
+        self.assertIsInstance( res.data['data']['task'].get('assignments'), list )
 
     def test_try_to_get_a_task( self ):
         '''
@@ -334,13 +364,13 @@ class TestTasks( APITestCase ):
             An user tries to delete a task without a role set up
         '''
         # 2nd user
-        user, token = create_second_user( self )
+        # user, token = create_second_user( self )
 
         # Creates a task with 1st user
         self.client.post( url_create_task, task_data, format='json' )
 
         # Try to delete with 2nd user
-        change_credentials( self, token )
+        change_credentials( self, self.second_user_token )
         res = self.client.delete( url_delete_task )
 
         # Assertions

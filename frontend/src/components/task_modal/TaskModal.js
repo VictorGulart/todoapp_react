@@ -42,6 +42,12 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
   const handleInput = (e) => {
     e.target.style.height = "auto";
     e.target.style.height = e.target.scrollHeight + "px";
+
+    // update the text area
+    setTask({
+      ...task,
+      description: e.target.value,
+    });
   };
 
   useEffect(() => {
@@ -168,7 +174,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
         key={`assign-${idx}`}
         className="text-slate-600 p-2 flex items-center justify-center gap-x-2 bg-slate-100/[.3] rounded-md"
       >
-        <span className="text-center">{assignment}</span>
+        <span className="text-center">{assignment.email}</span>
         <i
           className="justify-end cursor-pointer fa-solid fa-x text-xs pt-1"
           onClick={delAssignment}
@@ -281,6 +287,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
             name="description"
             id="subtask-note"
             onInput={handleInput}
+            value={task.description}
           ></textarea>
         </div>
 

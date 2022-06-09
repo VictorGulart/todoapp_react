@@ -47,7 +47,8 @@ task_data = {
     'title' :'Test Task',
     'description' : 'Task description',
     'assignments' : [],
-    'from_list' : 1
+    'from_list' : 1,
+    'sub_tasks': [{'title':'new subtask', 'complete':False}, ]
 }
 
 subtask_data = {

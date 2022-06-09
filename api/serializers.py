@@ -5,6 +5,9 @@ from django.db.models import fields
 from django.db.models.query import QuerySet
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+from django.core.exceptions import ObjectDoesNotExist
+
+
 
 # DRF
 from rest_framework import serializers
@@ -21,10 +24,22 @@ from .models import TaskList, Task, Role, Assignment, SubTask
 # Debugging
 from pdb import set_trace
 
+def get_or_none(cls, **kwargs):
+    try: 
+        return cls.get(**kwargs)
+    except ObjectDoesNotExist:
+        return None
+
 class AssignmentrSrl(serializers.ModelSerializer):
+    email = serializers.SerializerMethodField(required=False)
+
     class Meta:
         model = Assignment
-        fields = ('user', 'task')
+        fields = ('user', 'email')
+    
+    def get_email(self, obj):
+        return obj.user.email 
+
     
     def create(self, validated_data):
         '''
@@ -65,6 +80,8 @@ class AssignmentrSrl(serializers.ModelSerializer):
     
 
 class SubTaskSrl(serializers.ModelSerializer):
+    title = serializers.CharField()
+    complete = serializers.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__( *args, **kwargs )
@@ -72,13 +89,15 @@ class SubTaskSrl(serializers.ModelSerializer):
 
     class Meta:
         model = SubTask
-        fields = "__all__"
+        fields = ("id", "title", "complete", )
+        # fields = "__all__"
 
 class TaskSrl(serializers.ModelSerializer):
-    assignments = serializers.ListSerializer(
-        child = serializers.ModelField(model_field=Assignment()._meta.get_field('user')),
-        allow_empty=True
-    )
+    # assignments = serializers.ListSerializer(
+    #     child = serializers.ModelField(model_field=Assignment()._meta.get_field('user')),
+    #     allow_empty=True
+    # )
+    assignments = AssignmentrSrl(many=True, required=False)
     sub_tasks = SubTaskSrl(many=True, required=False)
 
     def __init__(self, *args, **kwargs):
@@ -103,8 +122,8 @@ class TaskSrl(serializers.ModelSerializer):
             # empty assignments, will assign only to creator
             return value
 
-        for user_id in value:
-            user = User.objects.get( pk=user_id )
+        for user in value:
+            # user = User.objects.get( pk=user_dict.get("user").id )
             if not user:
                 raise User.DoesNotExist
             else:
@@ -127,6 +146,7 @@ class TaskSrl(serializers.ModelSerializer):
         user = None
         request = self.context.get('request')
         assignments = None
+        sub_tasks = None
 
         try: 
             # get the main user
@@ -135,6 +155,11 @@ class TaskSrl(serializers.ModelSerializer):
 
             # get the assignments if there is any
             assignments = validated_data.pop("assignments")
+
+
+            #### Addd the subtasks
+            sub_tasks = validated_data.pop("sub_tasks") # 
+            ####
 
             # get the list, why? to check if the user has permission
             list = validated_data.get("from_list")
@@ -154,7 +179,10 @@ class TaskSrl(serializers.ModelSerializer):
             # if there are assignments, make them
             if assignments != None:
                 for new_user in assignments:
-                    task.assignments.create(user=new_user)
+                    task.assignments.create(user=new_user.get('user', 'None'))
+
+            for subtask in sub_tasks:
+                task.sub_tasks.create(**subtask, from_task=task)
 
             return task
         except Exception as e:
@@ -168,6 +196,7 @@ class TaskSrl(serializers.ModelSerializer):
         # check if the user
         user = None
         assignments = None
+        sub_tasks = None
         req = self.context.get('request')
 
         if hasattr(req, 'user'):
@@ -181,10 +210,20 @@ class TaskSrl(serializers.ModelSerializer):
         
         # remove assignments from validated data
         assignments = validated_data.pop('assignments')
+        sub_tasks = validated_data.pop('sub_tasks')
 
         # add changes to the instance
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
+        # creating the subtasks
+        for subtask in sub_tasks:
+            # check if there are repeated titles
+
+            if get_or_none(instance.sub_tasks, title=subtask.get('title', None)):
+                continue
+            else:
+                instance.sub_tasks.create(**subtask)
 
         instance.save() # save the changes
 
@@ -192,15 +231,15 @@ class TaskSrl(serializers.ModelSerializer):
         # check if the assignments already exist first
         # later create assignments for those that do not exist
 
-        for user in assignments:
+        for user_dict in assignments:
+            user = user_dict.get('user')
             try:
                 with transaction.atomic():
                     user.assignments.create(task=instance)
                     user.save()
             except IntegrityError:
                 self.warning_messages.append(f'@{user.username} already has the task assigned.')
-                
-
+        
         return instance
 
 class RoleSrl(serializers.ModelSerializer):
