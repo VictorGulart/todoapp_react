@@ -25,6 +25,12 @@ import {
   SELECT_LIST,
   SELETED_LIST_RESET,
   RESET_LIST_STORAGE,
+
+  // TASKS OPERTATIONS
+  // READ
+  FETCH_TASK_REQUEST,
+  FETCH_TASK_SUCCESS,
+  FETCH_TASK_FAILURE,
 } from "../action_creators/action_types";
 
 import {
@@ -33,6 +39,7 @@ import {
   create_list,
   update_list,
   delete_list,
+  get_task,
 } from "./urls";
 
 const default_list = {
@@ -324,5 +331,61 @@ export const selectList = (list_id) => {
 export const resetListStorage = () => {
   return {
     type: RESET_LIST_STORAGE,
+  };
+};
+
+export const fetchTask = (token, taskId) => {
+  return (dispatch) => {
+    dispatch(FETCH_LISTS_REQUEST);
+
+    // GET FROM THE API
+    fetch(get_task + taskId + "/", {
+      method: "GET",
+      headers: {
+        Authorization: "token " + token,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "sucess") {
+          // dispatch sucess
+        } else if (data.status === "fail") {
+          // dispatch failure, but don't save anything to redux
+          // this needs to be fixed
+          console.log("Something was wrong if the request.");
+          console.log(res.status);
+          console.log(data.message);
+        } else if (data.status === "error") {
+          // usually, server error, needs to be logged
+          console.log("Something worse happened.");
+          console.log(res.status);
+          console.log(data.message);
+          dispatch(fetchTaskFailure(data.message));
+        }
+      })
+      .catch((err) => {
+        // something else entirely happened
+        console.log(err);
+      });
+  };
+};
+
+const fetchTaskRequet = () => {
+  return {
+    type: FETCH_TASK_REQUEST,
+  };
+};
+
+const fetchTaskSuccess = (task) => {
+  return {
+    type: FETCH_TASK_SUCCESS,
+    payload: task,
+  };
+};
+
+const fetchTaskFailure = (errMsg) => {
+  return {
+    type: FETCH_TASK_FAILURE,
+    payload: errMsg,
   };
 };

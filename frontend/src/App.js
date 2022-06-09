@@ -16,7 +16,7 @@ import LoginPage from "./components/auth/login/LoginPage";
 import RegisterPage from "./components/auth/register/RegisterPage";
 import Home from "./components/home/Home";
 import Navigation from "./components/navigation/Navigation";
-import TaskModal from "./components/task_modal/TaskModal";
+import { TaskModal } from "./components/task_modal/TaskModal";
 
 function App() {
   return (

@@ -1,6 +1,7 @@
 import { connect } from "react-redux";
 import { useState, useEffect } from "react";
-import TaskModal from "../task_modal/TaskModal";
+import { TaskModal } from "../task_modal/TaskModal";
+
 import {
   fetchLists,
   fetchUpdateList,
@@ -162,6 +163,7 @@ function ListView({
           task={list.tasks.find((task) => {
             return task.id == editing.taskId;
           })}
+          taskId={editing.taskId}
           handleTaskEdit={setEditing}
         />
       ) : null}

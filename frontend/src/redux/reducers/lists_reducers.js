@@ -23,7 +23,18 @@ import {
   DELETE_LIST_SUCCESS,
   DELETE_LIST_FAILURE,
 
-  // TASKS
+  // SELECT LIST
+  SELECT_LIST,
+  RESET_LIST_STORAGE,
+
+  // ----------------------
+  // TASKS CRUD OPERATIONS
+  // ----------------------
+  // READ
+  FETCH_TASK_REQUEST,
+  FETCH_TASK_SUCCESS,
+  FETCH_TASK_FAILURE,
+
   // CREATE
   CREATE_TASK_REQUEST,
   CREATE_TASK_SUCCESS,
@@ -38,10 +49,6 @@ import {
   DELETE_TASK_REQUEST,
   DELETE_TASK_SUCCESS,
   DELETE_TASK_FAILURE,
-
-  // SELECT LIST
-  SELECT_LIST,
-  RESET_LIST_STORAGE,
 } from "../action_creators/action_types";
 
 const initState = {
@@ -49,6 +56,7 @@ const initState = {
   selectedList: undefined, // keep track of which one the user is seeing
   systemLists: [],
   lists: [],
+  task: {}, // task selected for editing on the modal, should be {} after saved
   err: "",
 };
 
@@ -176,6 +184,24 @@ export const listsReducer = (state = initState, action) => {
     /**
      * TASKS CRUD OPERATIONS
      */
+    case FETCH_TASK_REQUEST: {
+      return {
+        ...state,
+        loading: true,
+      };
+    }
+    case FETCH_TASK_SUCCESS: {
+      return {
+        loading: false,
+        task: action.payload,
+      };
+    }
+    case FETCH_TASK_FAILURE: {
+      return {
+        loading: false,
+        err: action.payload,
+      };
+    }
     case CREATE_TASK_REQUEST: {
       return {
         ...state,

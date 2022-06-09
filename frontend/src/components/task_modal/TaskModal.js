@@ -1,6 +1,12 @@
 import { connect } from "react-redux";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, createContext } from "react";
+// import { ModalContext } from "./modalContext";
 import SubTasks from "./SubTasks";
+
+// get task from redux or API
+// update task thourgh redux (it will update the api too)
+
+const ModalContext = createContext();
 
 function TaskModal({ task: origTask, handleTaskEdit }) {
   const closeModal = (e) => {
@@ -10,6 +16,16 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
 
   let assignments;
 
+  let initTask = {
+    title: "",
+    description: "",
+    start_date: "",
+    due_date: "",
+    completed: "",
+    sub_tasks: "",
+    assignments: [],
+  };
+
   let initUser = {
     id: "2",
     name: "Doe",
@@ -17,7 +33,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
     username: "TheDoe",
   };
 
-  const [task, setTask] = useState(origTask);
+  const [task, setTask] = useState(origTask || initTask);
 
   // Internal State
   const taskRef = useRef(null);
@@ -29,6 +45,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
   };
 
   useEffect(() => {
+    // Adjunsting the height of the textarea for the description
     let text = document.querySelector("#subtask-note");
     if (text.value == "") {
       text.setAttribute("style", "height:" + 50 + "px;");
@@ -36,6 +53,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
       text.setAttribute("style", "height:" + text.scrollHeight + "px;");
     }
 
+    // Disabling the Enter keydown default functionality
     const enterDisable = (e) => {
       if (e.key === "Enter" && document.querySelector()) {
         e.preventDefault();
@@ -49,6 +67,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
   }, []);
 
   useEffect(() => {
+    // Giving the assing input area focus
     if (assignInput.hidden === false) {
       document.querySelector("#assign-input").firstChild.focus();
     }
@@ -138,6 +157,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
   const saveTask = (e) => {
     e.preventDefault();
     console.log("saving task");
+    console.log(task);
   };
 
   // assignments array
@@ -193,7 +213,9 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
         </div>
 
         {/* sub tasks */}
-        <SubTasks task={task} setTask={setTask} />
+        <ModalContext.Provider value={{ task, setTask }}>
+          <SubTasks />
+        </ModalContext.Provider>
 
         {/* begin and due date */}
         <div className="w-full flex items-center justify-between">
@@ -256,7 +278,7 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
           <textarea
             className="w-full h-14 max-h-[270px] bg-slate-100/[0] rounded-md p-2 outline-none focus:bg-slate-100/[.4]"
             placeholder="Add Notes"
-            name=""
+            name="description"
             id="subtask-note"
             onInput={handleInput}
           ></textarea>
@@ -300,12 +322,24 @@ function TaskModal({ task: origTask, handleTaskEdit }) {
   );
 }
 
-const mapStateToProps = (state) => ({
-  list: state.listsReducer.lists[state.listsReducer.selectedList],
-});
+const mapStateToProps = (state, parentProps) => {
+  return {
+    list: state.listsReducer.lists[state.listsReducer.selectedList],
+    task: state.listsReducer.lists[state.listsReducer.selectedList].tasks.find(
+      (task) => {
+        return task.id === parentProps.taskId;
+      }
+    ),
+  };
+};
 
 const mapDispatchToProps = () => {
   return {};
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(TaskModal);
+const ConnectedTaskModal = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TaskModal);
+
+export { ConnectedTaskModal as TaskModal, ModalContext };

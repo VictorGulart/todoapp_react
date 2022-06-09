@@ -1,5 +1,6 @@
 import { connect } from "react-redux";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import { ModalContext } from "./TaskModal";
 
 const useFocus = () => {
   const htmlRef = useRef(null);
@@ -10,13 +11,34 @@ const useFocus = () => {
   return [htmlRef, setFocus];
 };
 
-const SubTask = ({ subtask: origTask, delSubTask, removeTargetSubTask }) => {
+const SubTask = ({
+  subtask: origTask,
+  delSubTask,
+  removeTargetSubTask,
+  setNewSubTask,
+}) => {
   const [inputRef, setInputFocus] = useFocus();
   const [subtask, setSubtask] = useState(origTask);
+  const { task, setTask } = useContext(ModalContext);
 
   useEffect(() => {
     setInputFocus();
   }, []);
+
+  useEffect(() => {}, [task]);
+
+  const updateSubTask = () => {
+    let newSubs = task.sub_tasks.map((sub) => {
+      if (sub.id === subtask.id) {
+        return subtask;
+      }
+      return sub;
+    });
+    setTask({
+      ...task,
+      sub_tasks: newSubs,
+    });
+  };
 
   return (
     <div
@@ -34,7 +56,11 @@ const SubTask = ({ subtask: origTask, delSubTask, removeTargetSubTask }) => {
         onBlur={(e) => {
           if (e.target.value === "") {
             removeTargetSubTask();
+          } else {
+            // update the main task
+            updateSubTask();
           }
+          setNewSubTask(false);
           e.target.parentNode.classList.remove("bg-slate-100/[0.5]");
         }}
         onChange={(e) => {
@@ -51,6 +77,10 @@ const SubTask = ({ subtask: origTask, delSubTask, removeTargetSubTask }) => {
             // Delete if not edited
             if (e.target.value === "") {
               removeTargetSubTask();
+            } else if (e.target.value !== "") {
+              // When Enter is pressed the title is saved to State
+              updateSubTask();
+              setNewSubTask(true);
             }
           }
         }}
@@ -68,13 +98,15 @@ const SubTask = ({ subtask: origTask, delSubTask, removeTargetSubTask }) => {
   );
 };
 
-const SubTasks = ({ task, setTask }) => {
-  let subtasks;
+const SubTasks = () => {
+  const { task, setTask } = useContext(ModalContext);
+  const [newSubTask, setNewSubTask] = useState(false);
   let initTask = {
     id: null,
     title: "",
     assignments: [], // a list of user objects
   };
+  let subtasks;
 
   const delSubTask = (delId) => {
     let newSubs = task.sub_tasks.filter((sub) => {
@@ -118,11 +150,18 @@ const SubTasks = ({ task, setTask }) => {
       <SubTask
         key={`subtask-${sub.id}`}
         subtask={sub}
+        setNewSubTask={setNewSubTask}
         delSubTask={delSubTask}
         removeTargetSubTask={remTargetSubTask}
       />
     );
   });
+
+  useEffect(() => {
+    if (newSubTask) {
+      addSubTask();
+    }
+  }, [newSubTask]);
 
   return (
     <div className="w-full min-h-[3rem] flex flex-col items-center justify-center gap-y-1">
