@@ -12,6 +12,7 @@ const useFocus = () => {
 };
 
 const SubTask = ({
+  idx,
   subtask: origTask,
   delSubTask,
   removeTargetSubTask,
@@ -25,15 +26,11 @@ const SubTask = ({
     setInputFocus();
   }, []);
 
-  useEffect(() => {}, [task]);
+  const updateSubTask = (subTasksIdx) => {
+    let newSubs;
+    newSubs = task.sub_tasks;
+    newSubs[subTasksIdx] = subtask;
 
-  const updateSubTask = () => {
-    let newSubs = task.sub_tasks.map((sub) => {
-      if (sub.id === subtask.id) {
-        return subtask;
-      }
-      return sub;
-    });
     setTask({
       ...task,
       sub_tasks: newSubs,
@@ -42,7 +39,7 @@ const SubTask = ({
 
   return (
     <div
-      id={subtask.title} //parent will keep the array index
+      id={idx} //parent will keep the array index
       key={`subtask-${subtask.id}`}
       className="w-full flex items-center justify-center hover:bg-slate-100/[0.5] cursor-default rounded-md p-2"
     >
@@ -58,7 +55,7 @@ const SubTask = ({
             removeTargetSubTask();
           } else {
             // update the main task
-            updateSubTask();
+            updateSubTask(e.target.parentNode.id);
           }
           setNewSubTask(false);
           e.target.parentNode.classList.remove("bg-slate-100/[0.5]");
@@ -79,7 +76,7 @@ const SubTask = ({
               removeTargetSubTask();
             } else if (e.target.value !== "") {
               // When Enter is pressed the title is saved to State
-              updateSubTask();
+              updateSubTask(e.target.parentNode.id);
               setNewSubTask(true);
             }
           }
@@ -91,6 +88,7 @@ const SubTask = ({
       <i
         className="justify-end fa-solid fa-x text-xs pt-1 cursor-pointer"
         onClick={(e) => {
+          console.log("deleting ", e.target.parentNode.id);
           delSubTask(e.target.parentNode.id);
         }}
       ></i>
@@ -104,14 +102,20 @@ const SubTasks = () => {
   let initTask = {
     id: null,
     title: "",
-    assignments: [], // a list of user objects
+    complete: false,
   };
   let subtasks;
 
-  const delSubTask = (taskTitle) => {
-    let newSubs = task.sub_tasks.filter((sub) => {
-      return parseInt(sub.title) !== parseInt(taskTitle);
+  const delSubTask = (subTaskIdx) => {
+    let newSubs = task.sub_tasks.filter((sub, idx) => {
+      if (idx !== subTaskIdx) {
+        console.log("found one");
+        return true;
+      }
+      return false;
     });
+
+    console.log(newSubs);
 
     newSubs = setTask({
       ...task,
@@ -144,7 +148,8 @@ const SubTasks = () => {
     // give focus if it is the last one
     return (
       <SubTask
-        key={`subtask-${sub.id}`}
+        idx={idx}
+        key={`subtask-${idx}`}
         subtask={sub}
         setNewSubTask={setNewSubTask}
         delSubTask={delSubTask}
