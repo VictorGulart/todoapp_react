@@ -20,7 +20,7 @@ const SubTask = ({
 }) => {
   const [inputRef, setInputFocus] = useFocus();
   const [subtask, setSubtask] = useState(origTask);
-  const { task, setTask } = useContext(ModalContext);
+  const { task, setTask, toSave, setToSave } = useContext(ModalContext);
 
   useEffect(() => {
     setInputFocus();
@@ -40,7 +40,6 @@ const SubTask = ({
   return (
     <div
       id={idx} //parent will keep the array index
-      key={`subtask-${subtask.id}`}
       className="w-full flex items-center justify-center hover:bg-slate-100/[0.5] cursor-default rounded-md p-2"
     >
       <input
@@ -65,6 +64,12 @@ const SubTask = ({
             ...subtask,
             title: e.target.value,
           });
+          if (!toSave.save) {
+            setToSave({
+              ...toSave,
+              save: true,
+            });
+          }
         }}
         onKeyDown={(e) => {
           // ENTER pressing when subtask has focus
@@ -88,7 +93,6 @@ const SubTask = ({
       <i
         className="justify-end fa-solid fa-x text-xs pt-1 cursor-pointer"
         onClick={(e) => {
-          console.log("deleting ", e.target.parentNode.id);
           delSubTask(e.target.parentNode.id);
         }}
       ></i>
@@ -97,7 +101,7 @@ const SubTask = ({
 };
 
 const SubTasks = () => {
-  const { task, setTask } = useContext(ModalContext);
+  const { task, setTask, toSave, setToSave } = useContext(ModalContext);
   const [newSubTask, setNewSubTask] = useState(false);
   let initTask = {
     id: null,
@@ -107,17 +111,12 @@ const SubTasks = () => {
   let subtasks;
 
   const delSubTask = (subTaskIdx) => {
-    let newSubs = task.sub_tasks.filter((sub, idx) => {
-      if (idx !== subTaskIdx) {
-        console.log("found one");
-        return true;
-      }
-      return false;
+    let newSubs;
+    newSubs = task.sub_tasks.filter((sub, idx) => {
+      return parseInt(idx) !== parseInt(subTaskIdx);
     });
 
-    console.log(newSubs);
-
-    newSubs = setTask({
+    setTask({
       ...task,
       sub_tasks: newSubs,
     });
@@ -136,6 +135,8 @@ const SubTasks = () => {
 
   // CHANGE ON API CALL
   const addSubTask = () => {
+    // Create a new task on the DB and get thee response
+    // Adding it to the end of the list.
     let subtask = initTask;
 
     setTask({
@@ -149,7 +150,7 @@ const SubTasks = () => {
     return (
       <SubTask
         idx={idx}
-        key={`subtask-${idx}`}
+        key={`subtask-0${idx}`}
         subtask={sub}
         setNewSubTask={setNewSubTask}
         delSubTask={delSubTask}
@@ -163,6 +164,13 @@ const SubTasks = () => {
       addSubTask();
     }
   }, [newSubTask]);
+
+  useEffect(() => {
+    setToSave({
+      ...toSave,
+      save: true,
+    });
+  }, [task.sub_tasks.length]);
 
   return (
     <div className="w-full min-h-[3rem] flex flex-col items-center justify-center gap-y-1">

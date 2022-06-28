@@ -75,5 +75,3 @@ class TestSubTasks(APITestCase):
         self.assertIsNotNone(res.data['data'].get("errors", None))
         self.assertNotEqual(res.data['data'].get("message", None), "")
     
-    
-    

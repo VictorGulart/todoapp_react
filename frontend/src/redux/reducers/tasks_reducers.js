@@ -19,6 +19,11 @@ import {
   DELETE_TASK_REQUEST,
   DELETE_TASK_SUCCESS,
   DELETE_TASK_FAILURE,
+
+  // CREATE SUBTASK
+  CREATE_SUBTASK_REQUEST,
+  CREATE_SUBTASK_SUCCESS,
+  CREATE_SUBTASK_FAILURE,
 } from "../action_creators/action_types";
 
 const initState = {
@@ -55,6 +60,30 @@ export const tasksReducer = (state = initState, action) => {
       return {
         loading: false,
         err: action.payload,
+      };
+    }
+    case CREATE_SUBTASK_REQUEST: {
+      return {
+        ...state,
+        loading: true,
+      };
+    }
+    case CREATE_SUBTASK_SUCCESS: {
+      // Add the new subtask
+      newSubtasks = state.sub_tasks;
+      newSubtasks.push(action.payload);
+
+      return {
+        ...state,
+        sub_tasks: newSubtasks,
+        loading: false,
+      };
+    }
+    case CREATE_SUBTASK_FAILURE: {
+      return {
+        ...state,
+        err: action.payload,
+        loading: false,
       };
     }
   }

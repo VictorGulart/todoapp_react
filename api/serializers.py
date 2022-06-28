@@ -1,4 +1,5 @@
 # Django
+from re import L
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError, transaction
 from django.db.models import fields
@@ -80,6 +81,7 @@ class AssignmentrSrl(serializers.ModelSerializer):
     
 
 class SubTaskSrl(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
     title = serializers.CharField()
     complete = serializers.BooleanField(required=False)
 
@@ -90,7 +92,6 @@ class SubTaskSrl(serializers.ModelSerializer):
     class Meta:
         model = SubTask
         fields = ("id", "title", "complete", )
-        # fields = "__all__"
 
 class TaskSrl(serializers.ModelSerializer):
     # assignments = serializers.ListSerializer(
@@ -146,7 +147,7 @@ class TaskSrl(serializers.ModelSerializer):
         user = None
         request = self.context.get('request')
         assignments = None
-        sub_tasks = None
+        sub_tasks = []
 
         try: 
             # get the main user
@@ -156,9 +157,9 @@ class TaskSrl(serializers.ModelSerializer):
             # get the assignments if there is any
             assignments = validated_data.pop("assignments")
 
-
             #### Addd the subtasks
-            sub_tasks = validated_data.pop("sub_tasks") # 
+            if validated_data.get("sub_tasks", None):
+                sub_tasks = validated_data.pop("sub_tasks") # 
             ####
 
             # get the list, why? to check if the user has permission
@@ -187,6 +188,13 @@ class TaskSrl(serializers.ModelSerializer):
             return task
         except Exception as e:
             raise(e)
+    
+    def not_in(self, other, sub_tasks):
+        for subtask in sub_tasks:
+            if subtask == other:
+                return False
+        return True
+
 
     def update(self, instance, validated_data):
         '''
@@ -217,6 +225,10 @@ class TaskSrl(serializers.ModelSerializer):
             setattr(instance, attr, value)
 
         # creating the subtasks
+        subtasks_to_del = filter(lambda x: self.not_in(x, sub_tasks), instance.sub_tasks.all())
+        for task in subtasks_to_del:
+            task.delete()
+
         for subtask in sub_tasks:
             # check if there are repeated titles
 
@@ -224,6 +236,8 @@ class TaskSrl(serializers.ModelSerializer):
                 continue
             else:
                 instance.sub_tasks.create(**subtask)
+        
+
 
         instance.save() # save the changes
 

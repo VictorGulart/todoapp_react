@@ -9,9 +9,12 @@ import {
   DELETE_TASK_SUCCESS,
   DELETE_TASK_FAILURE,
   UPDATE_LIST_FAILURE,
+  CREATE_SUBTASK_REQUEST,
+  CREATE_SUBTASK_SUCCESS,
+  CREATE_SUBTASK_FAILURE,
 } from "./action_types";
 
-import { create_task, update_task, delete_task } from "./urls";
+import { create_task, update_task, delete_task, create_subtask } from "./urls";
 
 /**
  * TASKS
@@ -198,6 +201,68 @@ const deleteTaskSuccess = (task) => {
 const deleteTaskFailure = (err) => {
   return {
     type: DELETE_TASK_SUCCESS,
+    payload: err,
+  };
+};
+
+// FETCH CREATE SUBTASK
+export const fetchCreateSubTask = (token, subtask) => {
+  // The subtask must contain the 'from_task' attribute
+  // Title can be empty
+
+  return (dispatch) => {
+    // record the request
+    dispatch(fetchCreateSubTaskRequest());
+
+    // API CALL
+    fetch(create_subtask, {
+      method: "POST",
+      headers: {
+        Authorization: "token " + token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(subtask),
+    })
+      .then((res) => {
+        res.json();
+      })
+      .then((data) => {
+        if (data.status === "success") {
+          dispatch(fetchCreateSubTaskSuccess(data.data.subtask));
+        } else if (data.status === "fail") {
+          console.log("Something is wrong with the request");
+          console.log(res.status);
+          console.log(data.message);
+          dispatch(fetchCreateSubTaskFailure(data.message));
+        } else if (data.status === "error") {
+          console.log("Something worse happened.");
+          console.log(res.status);
+          console.log(data.message);
+          dispatch(fetchCreateSubTaskFailure(data.message));
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+};
+
+const fetchCreateSubTaskRequest = () => {
+  return {
+    type: CREATE_SUBTASK_REQUEST,
+  };
+};
+
+const fetchCreateSubTaskSuccess = (subtask) => {
+  return {
+    type: CREATE_SUBTASK_SUCCESS,
+    payload: subtask,
+  };
+};
+
+const fetchCreateSubTaskFailure = (err) => {
+  return {
+    type: CREATE_SUBTASK_FAILURE,
     payload: err,
   };
 };

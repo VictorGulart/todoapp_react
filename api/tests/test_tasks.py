@@ -1,3 +1,4 @@
+from re import I
 from django.urls.base import reverse
 from rest_framework.test import APITestCase 
 
@@ -32,7 +33,6 @@ class TestTasks( APITestCase ):
 
         # Second user
         self.second_user, self.second_user_token = create_second_user( self ) 
-
 
     def test_create_task( self ):
         ''' 
@@ -187,9 +187,22 @@ class TestTasks( APITestCase ):
         self.assertIsNotNone( res.data['data'].get('task', None) )
         self.assertIsNotNone( res.data['data']['task'].get('sub_tasks', None) )
         self.assertNotEqual( len(res.data['data']['task'].get('sub_tasks', None)), 1 )
-   
-        
 
+    def test_update_subtasks_with_less(self):
+        '''
+            Update Task - send less subtasks that were initialy sent.
+        '''
+        # Create the main task
+        res = self.client.post( url_create_task, task_data, format='json' )
+
+        new_task = copy.deepcopy(task_data)
+        new_task['sub_tasks'] = [] # send back no subtask 
+
+        res = self.client.patch(url_update_task, new_task, format='json')
+
+        self.assertCountEqual(res.data['data']['task'].get('sub_tasks'), [])
+
+    
     def test_update_task_title_desc( self ):
         '''
             Update title and description of the task

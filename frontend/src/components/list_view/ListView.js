@@ -70,11 +70,12 @@ function ListView({
     title: "",
     description: "",
     tasks: [],
-    subtasks: [],
+    sub_tasks: [],
     start_date: "",
     end_date: "",
     complete: false,
   });
+  const [change, setChange] = useState(false);
 
   useEffect(() => {
     // Just check if there is a selectedList
@@ -97,6 +98,7 @@ function ListView({
   }, [selectedList]);
 
   useEffect(() => {
+    setChange(true);
     setListTitle(list["title"]);
   }, [list]);
 
@@ -134,6 +136,17 @@ function ListView({
                 // Save the new list - API call
                 let tempList = list;
                 tempList["title"] = listTitle;
+                updateList(token, tempList);
+                setChange(false);
+              }
+            }}
+            onBlur={() => {
+              // If the key pressed is the Enter
+              if (change) {
+                // Save the new list - API call
+                let tempList = list;
+                tempList["title"] = listTitle;
+                setChange(false);
                 updateList(token, tempList);
               }
             }}

@@ -336,7 +336,7 @@ export const resetListStorage = () => {
 
 export const fetchTask = (token, taskId) => {
   return (dispatch) => {
-    dispatch(FETCH_LISTS_REQUEST);
+    dispatch(fetchTaskRequest());
 
     // GET FROM THE API
     fetch(get_task + taskId + "/", {
@@ -349,12 +349,14 @@ export const fetchTask = (token, taskId) => {
       .then((data) => {
         if (data.status === "sucess") {
           // dispatch sucess
+          dispatch(fetchTaskSuccess(data.task));
         } else if (data.status === "fail") {
           // dispatch failure, but don't save anything to redux
           // this needs to be fixed
           console.log("Something was wrong if the request.");
           console.log(res.status);
           console.log(data.message);
+          dispatch(fetchTaskFailure(data.message));
         } else if (data.status === "error") {
           // usually, server error, needs to be logged
           console.log("Something worse happened.");
@@ -370,7 +372,7 @@ export const fetchTask = (token, taskId) => {
   };
 };
 
-const fetchTaskRequet = () => {
+const fetchTaskRequest = () => {
   return {
     type: FETCH_TASK_REQUEST,
   };
